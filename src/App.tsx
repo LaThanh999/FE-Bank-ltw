@@ -1,10 +1,9 @@
+import React from 'react';
 import './App.css';
-import { Route, BrowserRouter, Routes } from 'react-router-dom';
-import publicRoutes from './routers/publicRoutes.js';
-import Home from './pages/Home.jsx';
 import 'antd/dist/reset.css';
-
+import { Route, BrowserRouter, Routes } from 'react-router-dom';
 import { RecoilRoot } from 'recoil';
+import { publicRoutes } from 'routers';
 
 function App() {
   return (
@@ -13,9 +12,8 @@ function App() {
         <BrowserRouter>
           <Routes>
             {publicRoutes.map(({ ...route }) => (
-              <Route {...route} key={route.path} component={route.component} />
+              <Route {...route} key={route.path} element={route.element} />
             ))}
-            <Route path="/home" element={<Home />} />
           </Routes>{' '}
         </BrowserRouter>
       </RecoilRoot>

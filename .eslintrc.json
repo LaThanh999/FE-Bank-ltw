@@ -1,83 +1,53 @@
 {
-  "parser": "@babel/eslint-parser",
-  "extends": ["airbnb", "prettier", "plugin:eslint-comments/recommended"],
-  "plugins": ["eslint-comments", "react-hooks"],
   "env": {
     "browser": true,
-    "node": true,
-    "es6": true,
-    "mocha": true,
-    "jest": true,
-    "jasmine": true
+    "es2021": true
   },
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
+  ],
+  "overrides": [],
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "requireConfigFile": false,
-    "babelOptions": {
-      "presets": ["@babel/preset-react"]
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "project": "./tsconfig.json"
+  },
+  "settings": {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true,
+        "project": "src"
+      }
     }
   },
+  "plugins": ["react", "@typescript-eslint", "prettier", "import"],
   "rules": {
-    "react/jsx-wrap-multilines": 0,
-    "react/prop-types": 0,
-    "react/forbid-prop-types": 0,
-    "react/jsx-one-expression-per-line": 0,
-    "generator-star-spacing": 0,
-    "function-paren-newline": 0,
-    "import/no-unresolved": [2, { "ignore": ["^@/", "^umi/", "environments"] }],
-    "import/no-extraneous-dependencies": [
-      2,
+    "prettier/prettier": [
+      "warn",
       {
-        "optionalDependencies": true,
-        "devDependencies": [
-          "**/tests/**.js",
-          "/mock/**/**.js",
-          "**/**.test.js",
-          "**/_mock.{ts,js}",
-          "**/craco.config.js"
-        ]
+        "printWidth": 100,
+        "tabWidth": 2,
+        "useTabs": false,
+        "semi": true,
+        "singleQuote": true,
+        "trailingComma": "all",
+        "endOfLine": "auto"
       }
     ],
-    "jsx-a11y/no-noninteractive-element-interactions": 0,
-    "jsx-a11y/click-events-have-key-events": 0,
-    "jsx-a11y/no-static-element-interactions": 0,
-    "jsx-a11y/anchor-is-valid": 0,
-    "linebreak-style": 0,
-    // Too restrictive, writing ugly code to defend against a very unlikely scenario: https://eslint.org/docs/rules/no-prototype-builtins
-    "no-prototype-builtins": "off",
-    "import/prefer-default-export": "off",
-    "import/no-default-export": [0, "camel-case"],
-    // Too restrictive: https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/destructuring-assignment.md
-    "react/destructuring-assignment": "off",
-    "react/jsx-filename-extension": "off",
-    // Use function hoisting to improve code readability
-    "no-use-before-define": ["error", { "functions": false, "classes": true, "variables": true }],
-    // Common abbreviations are known and readable
-    "unicorn/prevent-abbreviations": "off",
-    "import/no-cycle": 0,
-    "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
-    // TODO: BE CAREFUL OF THIS RULE: https://github.com/facebook/react/issues/15204
-    // eslint --fix (or autofix) will cause bug
-    "react-hooks/exhaustive-deps": "warn", // Checks effect dependencies // TODO: BE CAREFUL
-    "react/self-closing-comp": "off",
-    "react/jsx-props-no-spreading": 0,
-    // Conflict with prettier
-    "arrow-body-style": ["error", "as-needed"],
-    "object-curly-newline": 0,
-    "implicit-arrow-linebreak": 0,
-    "operator-linebreak": 0,
-    "quotes": ["warn"],
-    "no-trailing-spaces": "warn",
-    "global-require": 0,
-    "import/no-dynamic-require": 0,
-    "no-unused-vars": "warn",
-    "no-underscore-dangle": 0,
-    "no-shadow": "off",
-    "import/extensions": "off",
-    "import/order": 0,
-    "eslint-comments/no-unlimited-disable": "off",
-    "no-nested-ternary": "off",
-    "camelcase": "off",
-    "react/jsx-uses-react": "off",
-    "react/react-in-jsx-scope": "off"
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
+    "camelcase": "error",
+    "spaced-comment": "error",
+    "no-duplicate-imports": "error"
   }
 }
