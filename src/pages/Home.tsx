@@ -1,9 +1,7 @@
-function Home() {
-  return (
-    <div>
-      <div className="text-purple-900">Home `1</div>
-    </div>
-  );
+import Home from 'modules/home';
+
+function HomePage() {
+  return <Home />;
 }
 
-export default Home;
+export default HomePage;

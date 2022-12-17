@@ -1,9 +1,13 @@
-import Home from 'pages/Home';
+import HomePage from 'pages/Home';
 
 const publicRoutes = [
   {
+    path: '/home',
+    element: <HomePage />,
+  },
+  {
     path: '/',
-    element: <Home />,
+    element: <HomePage />,
   },
 ];
 

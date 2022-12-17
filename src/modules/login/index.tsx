@@ -1,14 +1,52 @@
-import { Button, Form, Input } from 'antd';
+import { useMutation } from '@tanstack/react-query';
+import { Button, Form, Input, notification } from 'antd';
+import ReCAPTCHA from 'react-google-recaptcha';
+import { ACCESS_TOKEN, REFRESH_TOKEN } from 'constants/common';
+import { useRouter } from 'hooks/useRouter';
+import { useRef } from 'react';
+import { LoginServer } from 'services/auth';
 
 export default function Login() {
+  const { mutate } = useMutation(LoginServer);
+  const router = useRouter();
+  const captchaRef = useRef(null);
+
   const onFinish = (values: { username: string; password: string }) => {
     const { username, password } = values;
-    console.log(username, password);
+
+    const formatCaptcha = captchaRef as any;
+
+    const token = formatCaptcha.current.getValue();
+
+    if (token) {
+      mutate(
+        {
+          username,
+          password,
+        },
+        {
+          onSuccess: (data) => {
+            localStorage.setItem(ACCESS_TOKEN, data.accessToken);
+            localStorage.setItem(REFRESH_TOKEN, data.refreshToken);
+            router.push('/home');
+          },
+          onError: () => {
+            notification.error({
+              message: `Đăng nhập thất bại`,
+              description: `Vui lòng kiểm tra lại tài khoản mật khẩu`,
+              placement: 'bottomRight',
+            });
+          },
+        },
+      );
+    } else {
+      notification.error({
+        message: `Vui lòng xác nhận Captcha`,
+        placement: 'bottomRight',
+      });
+    }
   };
 
-  const onFinishFailed = (errorInfo: any) => {
-    console.log('Failed:', errorInfo);
-  };
   return (
     <div className="flex">
       <div
@@ -22,7 +60,6 @@ export default function Login() {
           wrapperCol={{ span: 16 }}
           initialValues={{ remember: true }}
           onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
           autoComplete="off"
         >
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
@@ -43,6 +80,10 @@ export default function Login() {
             rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
           >
             <Input.Password />
+          </Form.Item>
+
+          <Form.Item className="flex justify-end">
+            <ReCAPTCHA sitekey="6Lf_qIcjAAAAAANkzfwrMXTgZFHeEb6pl7ufaqlT" ref={captchaRef} />
           </Form.Item>
 
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
