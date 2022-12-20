@@ -1,12 +1,11 @@
 import LayoutContainer from 'layouts';
-import Home from 'modules/home';
 
-function HomePage() {
+function AccountPage() {
   return (
     <LayoutContainer>
-      <Home />
+      <div>Account</div>
     </LayoutContainer>
   );
 }
 
-export default HomePage;
+export default AccountPage;

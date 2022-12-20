@@ -12,8 +12,6 @@ import historyRouter from 'utils/history';
 function App() {
   const queryClient = new QueryClient();
 
-  console.log('publicRoutes', publicRoutes);
-
   return (
     <div className="App">
       <RecoilRoot>
@@ -21,6 +19,13 @@ function App() {
           theme={{
             token: {
               colorPrimary: '#48BB78',
+            },
+            components: {
+              Button: {
+                colorPrimary: '#4699EB',
+                colorPrimaryHover: '#4699EB',
+                colorPrimaryActive: '#4699EB',
+              },
             },
           }}
         >
@@ -30,7 +35,6 @@ function App() {
                 {publicRoutes.map(({ ...route }) => (
                   <Route key={route.path} path={route.path} element={route.element} />
                 ))}
-                <Route path="/home" element={<Login />} />
                 <Route path="/login" element={<Login />} />
               </Routes>
             </HistoryRouter>

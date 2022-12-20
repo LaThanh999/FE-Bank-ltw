@@ -1,5 +1,4 @@
-import { useMemo } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom';
 
 export const useRouter = () => {
   const navigate = useNavigate();
@@ -21,13 +20,11 @@ export const useRouter = () => {
     return useParams;
   };
 
-  return useMemo(
-    () => ({
-      push,
-      replace,
-      query,
-      params,
-    }),
-    [useNavigate, useParams, useSearchParams],
-  );
+  return {
+    push,
+    replace,
+    query,
+    params,
+    location: useLocation(),
+  };
 };
