@@ -8,6 +8,7 @@ import { publicRoutes } from 'routers';
 import Login from 'pages/Login';
 import { ConfigProvider } from 'antd';
 import historyRouter from 'utils/history';
+import LayoutContainer from 'layouts';
 
 function App() {
   const queryClient = new QueryClient();
@@ -18,7 +19,7 @@ function App() {
         <ConfigProvider
           theme={{
             token: {
-              colorPrimary: '#48BB78',
+              colorPrimary: '#4699EB',
             },
             components: {
               Button: {
@@ -32,9 +33,11 @@ function App() {
           <QueryClientProvider client={queryClient}>
             <HistoryRouter history={historyRouter}>
               <Routes>
-                {publicRoutes.map(({ ...route }) => (
-                  <Route key={route.path} path={route.path} element={route.element} />
-                ))}
+                <Route element={<LayoutContainer />}>
+                  {publicRoutes.map(({ ...route }) => (
+                    <Route key={route.path} path={route.path} element={route.element} />
+                  ))}
+                </Route>
                 <Route path="/login" element={<Login />} />
               </Routes>
             </HistoryRouter>
