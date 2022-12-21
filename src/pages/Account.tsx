@@ -1,5 +1,7 @@
+import Account from 'modules/account';
+
 function AccountPage() {
-  return <div>Account</div>;
+  return <Account />;
 }
 
 export default AccountPage;

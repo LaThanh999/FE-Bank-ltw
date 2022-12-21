@@ -46,6 +46,11 @@ const items: MenuItem[] = [
     ],
   }),
   getItem({
+    label: 'Nhắc nợ',
+    key: '5',
+    icon: <DesktopOutlined />,
+  }),
+  getItem({
     label: 'Cá nhân',
     key: '4',
     icon: <UserOutlined />,
@@ -69,6 +74,8 @@ const LayoutContainer = () => {
         return '3';
       case '/account':
         return '4';
+      case '/owe':
+        return '5';
       default:
         return '1';
     }
@@ -93,6 +100,9 @@ const LayoutContainer = () => {
         return;
       case '4':
         router.push('/account');
+        return;
+      case '5':
+        router.push('/owe');
         return;
       default:
         router.push('/home');

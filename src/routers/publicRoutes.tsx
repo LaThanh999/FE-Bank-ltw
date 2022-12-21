@@ -1,5 +1,6 @@
 import AccountPage from 'pages/Account';
 import HomePage from 'pages/Home';
+import { OwePage } from 'pages/Owe';
 import SendPrivatePage from 'pages/SendPrivate';
 import SendPublicPage from 'pages/SendPublic';
 
@@ -23,6 +24,10 @@ const publicRoutes = [
   {
     path: '/send-public',
     element: <SendPublicPage />,
+  },
+  {
+    path: '/owe',
+    element: <OwePage />,
   },
 ];
 
