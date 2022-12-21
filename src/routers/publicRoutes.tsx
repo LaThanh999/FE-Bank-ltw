@@ -1,5 +1,7 @@
 import AccountPage from 'pages/Account';
 import HomePage from 'pages/Home';
+import SendPrivatePage from 'pages/SendPrivate';
+import SendPublicPage from 'pages/SendPublic';
 
 const publicRoutes = [
   {
@@ -13,6 +15,14 @@ const publicRoutes = [
   {
     path: '/account',
     element: <AccountPage />,
+  },
+  {
+    path: '/send-private',
+    element: <SendPrivatePage />,
+  },
+  {
+    path: '/send-public',
+    element: <SendPublicPage />,
   },
 ];
 
