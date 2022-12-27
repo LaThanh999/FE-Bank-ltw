@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { Button, Form, Input, notification } from 'antd';
 import ReCAPTCHA from 'react-google-recaptcha';
-import { ACCESS_TOKEN, REFRESH_TOKEN } from 'constants/common';
+import { ACCESS_TOKEN, CARD_ID, REFRESH_TOKEN, USER_ID } from 'constants/common';
 import { useRouter } from 'hooks/useRouter';
 import { useRef } from 'react';
 import { LoginServer } from 'services/auth';
@@ -28,6 +28,8 @@ export default function Login() {
           onSuccess: (data) => {
             localStorage.setItem(ACCESS_TOKEN, data.accessToken);
             localStorage.setItem(REFRESH_TOKEN, data.refreshToken);
+            localStorage.setItem(USER_ID, String(data.userId));
+            localStorage.setItem(CARD_ID, data.maTaiKhoan);
             router.push('/home');
           },
           onError: () => {

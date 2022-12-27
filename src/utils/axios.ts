@@ -6,13 +6,13 @@ const BASE_URL = 'http://localhost:3008';
 
 export const socketURL = BASE_URL;
 
-export const baseURL = `${BASE_URL}/api`;
+export const baseURL = `${BASE_URL}`;
 
 export const axios = Axios.create({
   baseURL,
 });
 
-const ignoreApis = ['/api/v1/auth/refreshToken'];
+const ignoreApis = ['/dangnhap/refreshToken'];
 
 axios.interceptors.request.use((config) => ({
   ...config,
@@ -34,8 +34,9 @@ axios.interceptors.response.use(
       originalRequest._retry = true;
       const accessToken = localStorage.getItem(ACCESS_TOKEN);
       const refreshToken = localStorage.getItem(REFRESH_TOKEN);
+      console.log({ accessToken, refreshToken });
       try {
-        const { data } = await axios.post('/api/auth/refreshToken', {
+        const { data } = await axios.post('/dangnhap/refreshToken', {
           accessToken,
           refreshToken,
         });
@@ -53,6 +54,13 @@ axios.interceptors.response.use(
         }
       }
     }
+    // note
+    // const errFormat = error as any;
+    // if (errFormat?.response?.status === 401) {
+    //   localStorage.removeItem(ACCESS_TOKEN);
+    //   localStorage.removeItem(REFRESH_TOKEN);
+    //   historyRouter.replace('/login');
+    // }
     return Promise.reject(error);
   },
 );
