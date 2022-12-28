@@ -15,3 +15,11 @@ export interface UserRecommendDTO {
   create_at: string;
   update_at: string;
 }
+
+export interface ParamsAddUserRecommend {
+  maTaiKhoanNguoiChuyen: string;
+  maTaiKhoanNguoiNhan: string;
+  tenGoiNho: string;
+  maNganHang: string;
+  create_at: string;
+}

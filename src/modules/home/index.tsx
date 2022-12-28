@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { Button, Divider, Form, Input, Modal, Space, Table } from 'antd';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Button, Divider, Form, Input, Modal, Select, Space, Table } from 'antd';
 import { CardATM } from 'components/CardATM';
 import { SpinnerComponent } from 'components/Common/Spin';
 import { MoneyUser } from 'components/MoneyUser';
@@ -7,7 +7,13 @@ import { CARD_ID, USER_ID } from 'constants/common';
 import { formatNumberCurrent } from 'helper/number';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
-import { GetHistoryServer, GetMoneyUserServer, GetUserRecommendServer } from 'services/account';
+import {
+  AddUserRecommendServer,
+  GetHistoryServer,
+  GetMoneyUserServer,
+  GetUserRecommendServer,
+} from 'services/account';
+import { GetBanksServer } from 'services/bank';
 
 const formItemLayout = {
   labelCol: {
@@ -103,7 +109,6 @@ export default function Home() {
       refetchOnWindowFocus: false,
     },
   );
-
   const { data: dataRecommend, isLoading: isLoadingRecommend } = useQuery(
     ['getUserRecommend'],
     () => GetUserRecommendServer(carId as string),
@@ -111,6 +116,10 @@ export default function Home() {
       refetchOnWindowFocus: false,
     },
   );
+  const { data: dataBanks } = useQuery(['getBanks'], () => GetBanksServer(), {
+    refetchOnWindowFocus: false,
+  });
+  const { mutate: mutateAddUserRecommend } = useMutation(AddUserRecommendServer);
 
   const [dataHistory, setDataHistory] = useState<
     {
@@ -122,7 +131,6 @@ export default function Home() {
       atTime: string;
     }[]
   >([]);
-
   const [dataUserRecommend, setDataRecommend] = useState<
     {
       key: number;
@@ -161,6 +169,19 @@ export default function Home() {
   }, [dataRecommend]);
 
   const [isOpenModalAdd, setIsOpenModalAdd] = useState(false);
+
+  const addUserRecommend = (values: {
+    nameRecommend: string;
+    numberCard: string;
+    cardNumber: string;
+  }) => {
+    const { nameRecommend, numberCard, cardNumber } = values;
+    console.log({
+      nameRecommend,
+      numberCard,
+      cardNumber,
+    });
+  };
 
   if (isLoadingGetMoney || isLoadingHistory || isLoadingRecommend) return <SpinnerComponent />;
 
@@ -212,15 +233,40 @@ export default function Home() {
           onOk={() => setIsOpenModalAdd(false)}
           onCancel={() => setIsOpenModalAdd(false)}
         >
-          <Form {...formItemLayout} className="mt-6" form={form} onFinish={() => {}}>
-            <Form.Item label="Tên gọi" name="NameTo">
+          <Form {...formItemLayout} className="mt-6" form={form} onFinish={addUserRecommend}>
+            <Form.Item label="Tên gọi" name="nameRecommend">
               <Input />
             </Form.Item>
-            <Form.Item label="Số tài khoản" name="numberCard">
+            <Form.Item
+              required
+              rules={[
+                {
+                  required: true,
+                  message: 'Vui lòng nhập số tài khoản',
+                },
+              ]}
+              label="Số tài khoản"
+              name="numberCard"
+            >
               <Input />
             </Form.Item>
-            <Form.Item label="Ngân hàng" name="Bank">
-              <Input />
+            <Form.Item
+              required
+              rules={[
+                {
+                  required: true,
+                  message: 'Vui lòng chọn ngân hàng',
+                },
+              ]}
+              label="Ngân hàng"
+              name="bank"
+            >
+              <Select
+                options={dataBanks?.map((el) => ({
+                  value: el.id,
+                  label: el.tenNganHang,
+                }))}
+              ></Select>
             </Form.Item>
             <Form.Item className="flex justify-end">
               <Button

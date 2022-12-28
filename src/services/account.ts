@@ -1,4 +1,4 @@
-import { UserMoneyDTO, UserRecommendDTO } from 'types/account';
+import { ParamsAddUserRecommend, UserMoneyDTO, UserRecommendDTO } from 'types/account';
 import { HistoryExchangeDTO } from 'types/history';
 import axios from 'utils/axios';
 
@@ -29,6 +29,17 @@ export const GetUserRecommendServer = async (
     const { data } = await axios.get<UserRecommendDTO[]>(
       `/danhSachNguoiNhan/getByAccountNumber/${accountNumber}`,
     );
+    return data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const AddUserRecommendServer = async (params: ParamsAddUserRecommend) => {
+  try {
+    const { data } = await axios.post<UserRecommendDTO[]>(`/danhSachNguoiNhan`, {
+      params,
+    });
     return data;
   } catch (error) {
     return Promise.reject(error);
