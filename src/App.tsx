@@ -29,6 +29,13 @@ function App() {
                 colorPrimaryHover: '#4699EB',
                 colorPrimaryActive: '#4699EB',
               },
+              Modal: {
+                colorBgLayout: '#4699EB',
+                colorBgBase: '#4699EB',
+                colorPrimary: '#4699EB',
+                colorPrimaryHover: '#4699EB',
+                colorPrimaryActive: '#4699EB',
+              },
             },
           }}
         >

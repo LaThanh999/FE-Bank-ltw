@@ -12,14 +12,29 @@ export interface UserRecommendDTO {
   maNganHang: string;
   hoTenNguoiNhan: string;
   loaiGiaoDich: string;
+  idNganHang: number;
+  tenNganHang: string;
   create_at: string;
   update_at: string;
+}
+
+export interface AccountDTO {
+  id: number;
+  taiKhoan: string;
+  matKhau: string;
+  hoTen: string;
+  email: string;
+  sdt: string;
+  loaiTaiKhoan: number;
+  maTaiKhoan: string;
+  OTP?: any;
+  create_at?: any;
 }
 
 export interface ParamsAddUserRecommend {
   maTaiKhoanNguoiChuyen: string;
   maTaiKhoanNguoiNhan: string;
   tenGoiNho: string;
-  maNganHang: string;
+  idNganHang: string;
   create_at: string;
 }

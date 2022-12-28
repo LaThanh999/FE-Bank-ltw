@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Button, Divider, Form, Input, Modal, Select, Space, Table } from 'antd';
+import { Button, Divider, Form, Input, Modal, notification, Select, Space, Table } from 'antd';
 import { CardATM } from 'components/CardATM';
 import { SpinnerComponent } from 'components/Common/Spin';
 import { MoneyUser } from 'components/MoneyUser';
@@ -9,9 +9,13 @@ import moment from 'moment';
 import { useEffect, useState } from 'react';
 import {
   AddUserRecommendServer,
+  EditUserRecommendServer,
   GetHistoryServer,
   GetMoneyUserServer,
+  GetUserByNumberCardServer,
+  GetUserRecommendBuyAccountServer,
   GetUserRecommendServer,
+  RemoveUserRecommendServer,
 } from 'services/account';
 import { GetBanksServer } from 'services/bank';
 
@@ -25,43 +29,6 @@ const formItemLayout = {
     sm: { span: 16 },
   },
 };
-
-const columns = [
-  {
-    title: 'Tên gợi nhớ',
-    dataIndex: 'name',
-    key: 'name',
-  },
-  {
-    title: 'Họ tên',
-    dataIndex: 'nameBank',
-    key: 'nameBank',
-  },
-  {
-    title: 'Số tài khoản',
-    dataIndex: 'address',
-    key: 'address',
-  },
-  {
-    title: 'Ngân hàng',
-    dataIndex: 'bank',
-    key: 'bank',
-  },
-  {
-    title: 'Action',
-    key: 'action',
-    render: () => (
-      <Space size="middle">
-        <button className="underline italic font-medium text-sky-600 hover:text-sky-800">
-          Edit
-        </button>
-        <button className="underline italic font-medium text-sky-600 hover:text-sky-800">
-          Delete
-        </button>
-      </Space>
-    ),
-  },
-];
 
 const columnsHistory = [
   {
@@ -92,7 +59,56 @@ const columnsHistory = [
 ];
 
 export default function Home() {
+  const columns = [
+    {
+      title: 'Tên gợi nhớ',
+      dataIndex: 'name',
+      key: 'name',
+    },
+    {
+      title: 'Họ tên',
+      dataIndex: 'nameBank',
+      key: 'nameBank',
+    },
+    {
+      title: 'Số tài khoản',
+      dataIndex: 'address',
+      key: 'address',
+    },
+    {
+      title: 'Ngân hàng',
+      dataIndex: 'bank',
+      key: 'bank',
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (_: any, record: any) => (
+        <Space size="middle">
+          <button
+            className="underline italic font-medium text-sky-600 hover:text-sky-800"
+            onClick={() => {
+              editUserRecommend(record.id, record.numberCardFrom);
+            }}
+          >
+            Edit
+          </button>
+          <button
+            className="underline italic font-medium text-sky-600 hover:text-sky-800"
+            onClick={() => {
+              removeUserRecommend(record.id);
+            }}
+          >
+            Delete
+          </button>
+        </Space>
+      ),
+    },
+  ];
+
   const [form] = Form.useForm();
+  const [isOpenModalAdd, setIsOpenModalAdd] = useState(false);
+  const [isOpenModalEdit, setIsOpenModalEdit] = useState(false);
   const userId = localStorage.getItem(USER_ID);
   const carId = localStorage.getItem(CARD_ID);
   const { data: dataCardUser, isLoading: isLoadingGetMoney } = useQuery(
@@ -109,17 +125,21 @@ export default function Home() {
       refetchOnWindowFocus: false,
     },
   );
-  const { data: dataRecommend, isLoading: isLoadingRecommend } = useQuery(
-    ['getUserRecommend'],
-    () => GetUserRecommendServer(carId as string),
-    {
-      refetchOnWindowFocus: false,
-    },
-  );
+  const {
+    data: dataRecommend,
+    isLoading: isLoadingRecommend,
+    refetch: refetchDataRecommend,
+  } = useQuery(['getUserRecommend'], () => GetUserRecommendServer(carId as string), {
+    refetchOnWindowFocus: false,
+  });
   const { data: dataBanks } = useQuery(['getBanks'], () => GetBanksServer(), {
     refetchOnWindowFocus: false,
   });
   const { mutate: mutateAddUserRecommend } = useMutation(AddUserRecommendServer);
+  const { mutate: mutateRemoveUserRecommend } = useMutation(RemoveUserRecommendServer);
+  const { mutate: mutateEditUserRecommend } = useMutation(EditUserRecommendServer);
+  const { mutate: mutateCheckUserRecommend } = useMutation(GetUserRecommendBuyAccountServer);
+  const { mutate: mutateGetUser } = useMutation(GetUserByNumberCardServer);
 
   const [dataHistory, setDataHistory] = useState<
     {
@@ -138,8 +158,16 @@ export default function Home() {
       address: string;
       nameBank: string;
       bank: string;
+      id: number;
+      numberCardFrom: string;
     }[]
   >([]);
+
+  useEffect(() => {
+    if (!isOpenModalAdd) {
+      form.resetFields();
+    }
+  }, [isOpenModalAdd]);
 
   useEffect(() => {
     const dataTemp = dataHistories?.map((el, index) => {
@@ -161,26 +189,175 @@ export default function Home() {
         key: index,
         name: el.tenGoiNho,
         address: el.maTaiKhoanNguoiNhan,
-        bank: el.maNganHang,
+        bank: el.tenNganHang,
         nameBank: el.hoTenNguoiNhan,
+        id: el.id,
+        numberCardFrom: el.maTaiKhoanNguoiNhan,
       };
     });
     if (dataTemp) setDataRecommend(dataTemp);
   }, [dataRecommend]);
 
-  const [isOpenModalAdd, setIsOpenModalAdd] = useState(false);
-
   const addUserRecommend = (values: {
     nameRecommend: string;
     numberCard: string;
-    cardNumber: string;
+    bank: string;
   }) => {
-    const { nameRecommend, numberCard, cardNumber } = values;
-    console.log({
-      nameRecommend,
-      numberCard,
-      cardNumber,
+    const { nameRecommend, numberCard, bank } = values;
+
+    mutateGetUser(numberCard, {
+      onSuccess: (user) => {
+        if (user.id || user.hoTen) {
+          mutateCheckUserRecommend(
+            {
+              accountFrom: carId as string,
+              accountTo: numberCard,
+            },
+            {
+              onSuccess: (data) => {
+                if (data.id) {
+                  notification.error({
+                    message: `Thất bại`,
+                    description: `Người dùng đã được lưu`,
+                    placement: 'bottomRight',
+                  });
+                } else {
+                  mutateAddUserRecommend(
+                    {
+                      maTaiKhoanNguoiChuyen: carId as string,
+                      maTaiKhoanNguoiNhan: numberCard,
+                      tenGoiNho: nameRecommend || user.hoTen,
+                      idNganHang: bank,
+                      // eslint-disable-next-line camelcase
+                      create_at: moment().format('YYYY-MM-DD HH:mm:ss').toString(),
+                    },
+                    {
+                      onSuccess: () => {
+                        notification.success({
+                          message: `Thành công`,
+                          description: `Tạo thành công`,
+                          placement: 'bottomRight',
+                        });
+                        refetchDataRecommend();
+                        setIsOpenModalAdd(false);
+                      },
+                      onError: () => {
+                        notification.error({
+                          message: `Thất bại`,
+                          description: `Tạo thất bại`,
+                          placement: 'bottomRight',
+                        });
+                      },
+                    },
+                  );
+                }
+              },
+            },
+          );
+        } else {
+          notification.error({
+            message: `Thất bại`,
+            description: `Vui lòng kiểm tra lại Số Tài Khoản`,
+            placement: 'bottomRight',
+          });
+        }
+      },
+      onError: () => {
+        notification.error({
+          message: `Thất bại`,
+          description: `Vui lòng kiểm tra lại Số Tài Khoản`,
+          placement: 'bottomRight',
+        });
+      },
     });
+  };
+
+  const removeUserRecommend = (id: string) => {
+    Modal.confirm({
+      zIndex: 10,
+      title: 'Xác nhận',
+      content: 'Bạn có muốn xóa ?',
+      okText: 'Xác nhận',
+      okType: 'default',
+      centered: true,
+      cancelText: 'Hủy',
+      onOk: () => {
+        mutateRemoveUserRecommend(id, {
+          onSuccess: () => {
+            notification.success({
+              message: `Thành công`,
+              description: `Xóa thành công`,
+              placement: 'bottomRight',
+            });
+            refetchDataRecommend();
+            setIsOpenModalAdd(false);
+          },
+          onError: () => {
+            notification.error({
+              message: `Thất bại`,
+              description: `Xóa thất bại`,
+              placement: 'bottomRight',
+            });
+          },
+        });
+      },
+    });
+  };
+
+  const editUserRecommend = (id: string, numberAccountTo: string) => {
+    mutateCheckUserRecommend(
+      {
+        accountFrom: carId as string,
+        accountTo: numberAccountTo,
+      },
+      {
+        onSuccess: (data) => {
+          if (data.id) {
+            form.setFieldsValue({
+              nameRecommendEdit: data.tenGoiNho,
+              numberCardEdit: data.maTaiKhoanNguoiNhan,
+              bankEdit: data.idNganHang,
+              idUserRecommend: data.id,
+              nameRecommend: data.hoTenNguoiNhan,
+            });
+          }
+        },
+      },
+    );
+    setIsOpenModalEdit(true);
+  };
+
+  const submitEditUserRecommend = (values: {
+    nameRecommendEdit: string;
+    idUserRecommend: string;
+    nameRecommend: string;
+  }) => {
+    const { nameRecommendEdit, idUserRecommend, nameRecommend } = values;
+    console.log('name', nameRecommend);
+    mutateEditUserRecommend(
+      {
+        id: idUserRecommend,
+        name: nameRecommendEdit || nameRecommend,
+      },
+      {
+        onSuccess: () => {
+          notification.success({
+            message: `Thành công`,
+            description: `Sửa thành công`,
+            placement: 'bottomRight',
+          });
+          refetchDataRecommend();
+          setIsOpenModalEdit(false);
+        },
+        onError: () => {
+          notification.error({
+            message: `Thất bại`,
+            description: `Sửa thất bại`,
+            placement: 'bottomRight',
+          });
+        },
+      },
+    );
   };
 
   if (isLoadingGetMoney || isLoadingHistory || isLoadingRecommend) return <SpinnerComponent />;
@@ -223,63 +400,101 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <div>
-        <Modal
-          title="Thêm người thân"
-          centered
-          open={isOpenModalAdd}
-          okType="primary"
-          footer={null}
-          onOk={() => setIsOpenModalAdd(false)}
-          onCancel={() => setIsOpenModalAdd(false)}
-        >
-          <Form {...formItemLayout} className="mt-6" form={form} onFinish={addUserRecommend}>
-            <Form.Item label="Tên gọi" name="nameRecommend">
-              <Input />
-            </Form.Item>
-            <Form.Item
-              required
-              rules={[
-                {
-                  required: true,
-                  message: 'Vui lòng nhập số tài khoản',
-                },
-              ]}
-              label="Số tài khoản"
-              name="numberCard"
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item
-              required
-              rules={[
-                {
-                  required: true,
-                  message: 'Vui lòng chọn ngân hàng',
-                },
-              ]}
-              label="Ngân hàng"
-              name="bank"
-            >
-              <Select
-                options={dataBanks?.map((el) => ({
-                  value: el.id,
-                  label: el.tenNganHang,
-                }))}
-              ></Select>
-            </Form.Item>
-            <Form.Item className="flex justify-end">
-              <Button
-                type="primary"
-                htmlType="submit"
-                className="login-form-button bg-sky-600 mt-8"
-              >
-                Xác nhận
-              </Button>
-            </Form.Item>
-          </Form>
-        </Modal>
-      </div>
+      {/* Modal Add */}
+      <Modal
+        title="Thêm người thân"
+        centered
+        open={isOpenModalAdd}
+        okType="primary"
+        footer={null}
+        onOk={() => setIsOpenModalAdd(false)}
+        onCancel={() => setIsOpenModalAdd(false)}
+      >
+        <Form {...formItemLayout} className="mt-6" form={form} onFinish={addUserRecommend}>
+          <Form.Item label="Tên gọi" name="nameRecommend">
+            <Input />
+          </Form.Item>
+          <Form.Item
+            required
+            rules={[
+              {
+                required: true,
+                message: 'Vui lòng nhập số tài khoản',
+              },
+            ]}
+            label="Số tài khoản"
+            name="numberCard"
+          >
+            <Input type="number" />
+          </Form.Item>
+          <Form.Item
+            required
+            rules={[
+              {
+                required: true,
+                message: 'Vui lòng chọn ngân hàng',
+              },
+            ]}
+            initialValue={4}
+            label="Ngân hàng"
+            name="bank"
+          >
+            <Select
+              options={dataBanks?.map((el) => ({
+                value: el.id,
+                label: el.tenNganHang,
+              }))}
+              defaultValue={4}
+            ></Select>
+          </Form.Item>
+          <Form.Item className="flex justify-end">
+            <Button type="primary" htmlType="submit" className="login-form-button bg-sky-600 mt-8">
+              Xác nhận
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+      {/* Modal Edit */}
+      <Modal
+        title="Sửa thông tin người thân"
+        centered
+        open={isOpenModalEdit}
+        okType="primary"
+        footer={null}
+        onOk={() => setIsOpenModalEdit(false)}
+        onCancel={() => setIsOpenModalEdit(false)}
+      >
+        <Form {...formItemLayout} className="mt-6" form={form} onFinish={submitEditUserRecommend}>
+          <Form.Item hidden label="id" name="idUserRecommend">
+            <Input hidden />
+          </Form.Item>
+          <Form.Item hidden label="id" name="nameRecommend">
+            <Input hidden />
+          </Form.Item>
+          <Form.Item label="Tên gọi" name="nameRecommendEdit">
+            <Input />
+          </Form.Item>
+          <Form.Item label="Số tài khoản" name="numberCardEdit">
+            <Input disabled type="number" />
+          </Form.Item>
+          <Form.Item initialValue={4} label="Ngân hàng" name="bankEdit">
+            <Select
+              disabled
+              options={dataBanks?.map((el) => ({
+                value: el.id,
+                label: el.tenNganHang,
+              }))}
+              defaultValue={4}
+            ></Select>
+          </Form.Item>
+          <Form.Item className="flex justify-end">
+            <Button type="primary" htmlType="submit" className="login-form-button bg-sky-600 mt-8">
+              Xác nhận
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+      ƒ
     </>
   );
 }
