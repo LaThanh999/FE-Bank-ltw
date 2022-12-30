@@ -1,47 +1,21 @@
-import { Button, Form, Input, Space, Table, Tabs } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Button, Form, Input, InputNumber, Modal, notification, Space, Table, Tabs } from 'antd';
+import { CountDown } from 'components/Common/CountDown';
+import { SpinnerComponent } from 'components/Common/Spin';
+import { CARD_ID } from 'constants/common';
+import { formatNumberCurrent } from 'helper/number';
+import moment from 'moment';
+import { useEffect, useState } from 'react';
+import { TransferServer } from 'services/account';
+import { GetBanksServer } from 'services/bank';
+import { isVerifyOTPTransferServer, sendOTPTransferServer } from 'services/otpTransfer';
+import {
+  EditStatusOweServer,
+  GetOweByNumberAccountServer,
+  RemoveOweRecommendServer,
+} from 'services/owe';
 import { OweNumberCard } from './components/OweNumberCard';
 import { OweUsername } from './components/OweUsername';
-
-const dataSource = [
-  {
-    key: '1',
-    name: 'Mike',
-    address: '10 Downing Street',
-  },
-  {
-    key: '2',
-    name: 'John',
-    address: '10 Downing Street',
-  },
-];
-
-const columns = [
-  {
-    title: 'Tên gợi nhớ',
-    dataIndex: 'name',
-    key: 'name',
-  },
-  {
-    title: 'Số tài khoản',
-    dataIndex: 'address',
-    key: 'address',
-  },
-  {
-    title: 'Action',
-    key: 'action',
-    render: () => (
-      <Space size="middle">
-        <button className="underline italic font-medium text-sky-600 hover:text-sky-800">
-          Edit
-        </button>
-        <button className="underline italic font-medium text-sky-600 hover:text-sky-800">
-          Delete
-        </button>
-      </Space>
-    ),
-  },
-];
 
 const formItemLayout = {
   labelCol: {
@@ -54,49 +28,515 @@ const formItemLayout = {
   },
 };
 
+const timeExpiredMinutes = 1;
+
 export const Owe = () => {
+  const carId = localStorage.getItem(CARD_ID);
   const [form] = Form.useForm();
+  const [isOpenModalTransfer, setIsOpenModalTransfer] = useState(false);
+  const [showInputOTP, setShowInputOTP] = useState(false);
+  const [timeOTP, setTimeOTP] = useState<any>();
+  const [expired, setExpired] = useState(false);
+
+  const [dataOweState, setDataOweState] = useState<
+    {
+      key: number;
+      name: string;
+      numberCard: string;
+      money: string;
+      description: string;
+      status: number;
+      statusFormat: string;
+      id: number;
+    }[]
+  >([]);
+
+  const [dataIsOweState, setDataIsOweState] = useState<
+    {
+      key: number;
+      name: string;
+      numberCard: string;
+      money: string;
+      description: string;
+      id: number;
+      moneyFormat: string;
+      cardFrom: string;
+      cardTo: string;
+      bankForm: string;
+      bankTo: string;
+      statusFormat: string;
+      status: number;
+    }[]
+  >([]);
+
+  const columnsOwe = [
+    {
+      title: 'Họ tên',
+      dataIndex: 'name',
+      key: 'name',
+    },
+    {
+      title: 'Số tài khoản',
+      dataIndex: 'numberCard',
+      key: 'numberCard',
+    },
+    {
+      title: 'Số tiền',
+      dataIndex: 'money',
+      key: 'money',
+    },
+    {
+      title: 'Trạng thái',
+      dataIndex: 'statusFormat',
+      key: 'statusFormat',
+    },
+    {
+      title: 'Nội dung',
+      dataIndex: 'description',
+      key: 'description',
+    },
+    {
+      title: 'Thao tác',
+      key: 'action',
+      render: (_: any, data: any) => (
+        <Space size="middle">
+          <button
+            className="underline italic font-medium text-sky-600 hover:text-sky-800"
+            onClick={() => {
+              removeOwe(data.id);
+            }}
+          >
+            Huỷ
+          </button>
+        </Space>
+      ),
+    },
+  ];
+
+  const columnsIsOwe = [
+    {
+      title: 'Họ tên người nhắc',
+      dataIndex: 'name',
+      key: 'name',
+    },
+    {
+      title: 'Số tài khoản',
+      dataIndex: 'numberCard',
+      key: 'numberCard',
+    },
+    {
+      title: 'Số tiền',
+      dataIndex: 'moneyFormat',
+      key: 'money',
+    },
+    {
+      title: 'Trạng thái',
+      dataIndex: 'statusFormat',
+      key: 'statusFormat',
+    },
+    {
+      title: 'Nội dung',
+      dataIndex: 'description',
+      key: 'description',
+    },
+    {
+      title: 'Thao tác',
+      key: 'action',
+      render: (_: any, data: any) => (
+        <Space size="middle" className="flex justify-end">
+          {data.status !== 1 && (
+            <button
+              className="underline italic font-medium text-sky-600 hover:text-sky-800"
+              onClick={() => {
+                onTranfer(data);
+              }}
+            >
+              Thanh toán
+            </button>
+          )}
+
+          <button
+            className="underline italic font-medium text-sky-600 hover:text-sky-800"
+            onClick={() => {
+              removeOwe(data.id);
+            }}
+          >
+            Huỷ
+          </button>
+        </Space>
+      ),
+    },
+  ];
+
+  const {
+    data: dataOwe,
+    isLoading: isLoadingDataOwe,
+    refetch: refetchDataOwe,
+  } = useQuery(
+    ['getOwe'],
+    () => GetOweByNumberAccountServer({ numberCard: carId as string, type: 1 }),
+    {
+      refetchOnWindowFocus: false,
+    },
+  );
+
+  const {
+    data: dataIsOwe,
+    isLoading: isLoadingDataIsOwe,
+    refetch: refetchDataIsOwe,
+  } = useQuery(
+    ['getIsOwe'],
+    () => GetOweByNumberAccountServer({ numberCard: carId as string, type: 2 }),
+    {
+      refetchOnWindowFocus: false,
+    },
+  );
+  const { data: dataBanks } = useQuery(['getBanks'], () => GetBanksServer(), {
+    refetchOnWindowFocus: false,
+  });
+  const { mutate: mutateRemoveUserRecommend } = useMutation(RemoveOweRecommendServer);
+  const { mutate: mutateTransfer } = useMutation(TransferServer);
+  const { mutate: mutateEditOwe } = useMutation(EditStatusOweServer);
+  const { mutate: mutateSendOTP } = useMutation(sendOTPTransferServer);
+  const { mutate: mutateVerifyOtp } = useMutation(isVerifyOTPTransferServer);
+
+  useEffect(() => {
+    const dataTemp = dataOwe?.map((el, index) => {
+      return {
+        key: index,
+        name: el.hoTenNguoiNo as string,
+        numberCard: el.maTaiKhoanNguoiNo,
+        money: `${formatNumberCurrent(el.soTienChuyen)} VND`,
+        description: el.noiDung,
+        id: el.id,
+        status: el.tinhTrang,
+        statusFormat: el.tinhTrang === 0 ? 'Chưa thanh toán' : 'Đã thanh toán',
+      };
+    });
+    if (dataTemp) setDataOweState(dataTemp);
+  }, [dataOwe]);
+
+  useEffect(() => {
+    const dataTemp = dataIsOwe?.map((el, index) => {
+      return {
+        key: index,
+        name: el.hoTenChuNo as string,
+        numberCard: el.maTaiKhoanChuNo,
+        moneyFormat: `${formatNumberCurrent(el.soTienChuyen)} VND`,
+        description: el.noiDung,
+        id: el.id,
+        money: el.soTienChuyen,
+        bankForm: el.maNganHangNguoiNo,
+        bankTo: el.maNganHangChuNo,
+        cardFrom: el.maTaiKhoanNguoiNo,
+        cardTo: el.maTaiKhoanChuNo,
+        status: el.tinhTrang,
+        statusFormat: el.tinhTrang === 0 ? 'Chưa thanh toán' : 'Đã thanh toán',
+      };
+    });
+    if (dataTemp) setDataIsOweState(dataTemp);
+  }, [dataIsOwe]);
+
+  const removeOwe = (id: string) => {
+    Modal.confirm({
+      zIndex: 10,
+      title: 'Xác nhận',
+      content: 'Bạn có muốn xóa ?',
+      okText: 'Xác nhận',
+      okType: 'default',
+      centered: true,
+      cancelText: 'Hủy',
+      onOk: () => {
+        mutateRemoveUserRecommend(id, {
+          onSuccess: () => {
+            notification.success({
+              message: `Thành công`,
+              description: `Hủy thành công`,
+              placement: 'bottomRight',
+            });
+            refetchDataOwe();
+            refetchDataIsOwe();
+          },
+          onError: () => {
+            notification.error({
+              message: `Thất bại`,
+              description: `Hủy thất bại`,
+              placement: 'bottomRight',
+            });
+          },
+        });
+      },
+    });
+  };
+
+  const onTranfer = (data: any) => {
+    form.setFieldsValue({
+      cardFrom: data.cardFrom,
+      cardTo: data.cardTo,
+      bankTo: data.bankTo,
+      bankFrom: data.bankForm,
+      numberMoney: data.money,
+      idOwe: data.id,
+    });
+    setIsOpenModalTransfer(true);
+  };
+
+  const submitTransfer = (values: any) => {
+    const { otp, cardFrom, cardTo, bankTo, bankFrom, numberMoney, idOwe } = values;
+    mutateVerifyOtp(
+      {
+        numberCardFrom: cardFrom,
+        numberCardTo: cardTo,
+        inputOtp: otp,
+      },
+      {
+        onSuccess: ({ otpVerified }: { otpVerified: boolean }) => {
+          if (otpVerified) {
+            mutateTransfer(
+              {
+                soTaiKhoanGui: cardFrom,
+                soTaiKhoanNhan: cardTo,
+                soTien: numberMoney,
+                noiDung: 'Thanh toán nhắc nợ',
+                idNganHangNhan: bankTo,
+                idNganHangGui: bankFrom,
+                idLoaiGiaoDich: 1,
+                traPhi: 0,
+              },
+              {
+                onSuccess: () => {
+                  mutateEditOwe(
+                    { id: idOwe, status: 1 },
+                    {
+                      onSuccess: () => {
+                        notification.success({
+                          message: `Thành công`,
+                          description: `Thanh toán thành công`,
+                          placement: 'bottomRight',
+                        });
+                        refetchDataOwe();
+                        refetchDataIsOwe();
+                        setIsOpenModalTransfer(false);
+                      },
+                      onError: () => {
+                        notification.error({
+                          message: `Thất bại`,
+                          description: `Thanh toán thất bại`,
+                          placement: 'bottomRight',
+                        });
+                      },
+                    },
+                  );
+                },
+                onError: () => {
+                  notification.error({
+                    message: `Thất bại`,
+                    description: `Thanh toán thất bại`,
+                    placement: 'bottomRight',
+                  });
+                },
+              },
+            );
+          } else {
+            form.setFieldValue('otp', null);
+            notification.error({
+              message: `OTP không đúng`,
+              description: `Vui lòng nhập lại OTP`,
+              placement: 'bottomRight',
+            });
+          }
+        },
+        onError: () => {
+          form.setFieldValue('otp', null);
+          notification.error({
+            message: `OTP không đúng`,
+            description: `Vui lòng nhập lại OTP`,
+            placement: 'bottomRight',
+          });
+        },
+      },
+    );
+  };
+
+  const sendOTP = () => {
+    const numberCardFrom = form.getFieldValue('cardFrom');
+    const numberCardTo = form.getFieldValue('cardTo');
+    mutateSendOTP(
+      {
+        numberCardFrom,
+        numberCardTo,
+      },
+      {
+        onSuccess: () => {
+          setShowInputOTP(true);
+          setTimeOTP(
+            new Date(moment().add(timeExpiredMinutes, 'minutes').add(1, 'seconds').format()),
+          );
+        },
+        onError: () => {
+          notification.error({
+            message: `Thất bại`,
+            description: `Gửi OTP thất bại`,
+            placement: 'bottomRight',
+          });
+        },
+      },
+    );
+  };
+
+  const reSendOTP = () => {
+    const numberCardFrom = form.getFieldValue('cardFrom');
+    const numberCardTo = form.getFieldValue('cardTo');
+    mutateSendOTP(
+      {
+        numberCardFrom,
+        numberCardTo,
+      },
+      {
+        onSuccess: () => {
+          setTimeOTP(
+            new Date(moment().add(timeExpiredMinutes, 'minutes').add(1, 'seconds').format()),
+          );
+          setExpired(false);
+        },
+        onError: () => {
+          notification.error({
+            message: `Thất bại`,
+            description: `Gửi OTP thất bại`,
+            placement: 'bottomRight',
+          });
+        },
+      },
+    );
+  };
+
+  if (isLoadingDataOwe || isLoadingDataIsOwe) return <SpinnerComponent />;
 
   return (
-    <div className="w-full h-full flex">
-      <div className=" w-[40%] bg-slate-200 h-full p-6 overflow-scroll max-h-[95vh]">
-        <div className="bg-white w-full h-full rounded-lg flex flex-col items-center justify-center">
-          <div className="text-sky-900 font-black text-lg mb-6 ">Tạo nhắc nợ</div>
-          <Tabs
-            defaultActiveKey="1"
-            type="card"
-            size="large"
-            centered
-            className="font-bold"
-            items={[
-              {
-                label: `Người quen`,
-                key: '1',
-                children: <OweUsername />,
-              },
-              {
-                label: `Tài khoản mới`,
-                key: '2',
-                children: <OweNumberCard />,
-              },
-            ]}
-          />
+    <>
+      <div className="w-full h-full flex">
+        <div className=" w-[40%] bg-slate-200 h-full p-6 overflow-scroll max-h-[95vh]">
+          <div className="bg-white w-full h-full rounded-lg flex flex-col items-center justify-center">
+            <div className="text-sky-900 font-black text-lg mb-6 ">Tạo nhắc nợ</div>
+            <Tabs
+              defaultActiveKey="1"
+              type="card"
+              size="large"
+              centered
+              className="font-bold"
+              destroyInactiveTabPane={true}
+              items={[
+                {
+                  forceRender: false,
+                  label: `Người quen`,
+                  key: '1',
+                  children: <OweUsername dataBanks={dataBanks} callBack={refetchDataOwe} />,
+                },
+                {
+                  forceRender: false,
+                  label: `Tài khoản mới`,
+                  key: '2',
+                  children: <OweNumberCard dataBanks={dataBanks} callBack={refetchDataOwe} />,
+                },
+              ]}
+            />
+          </div>
+        </div>
+        <div className="w-[60%] h-full p-8  overflow-scroll max-h-[95vh]">
+          <div className="h-[50%] overflow-auto">
+            <div className="text-left text-sky-900 font-black text-lg mb-2 flex justify-between">
+              <div>Danh sách người nợ</div>
+            </div>
+            <Table dataSource={dataOweState} columns={columnsOwe} />
+          </div>
+          <div className="h-[50%] overflow-auto">
+            <div className="text-left text-sky-900 font-black text-lg mb-2 flex justify-between">
+              <div>Danh sách chưa thanh toán</div>
+            </div>
+            <Table dataSource={dataIsOweState} columns={columnsIsOwe} />
+          </div>
         </div>
       </div>
-      <div className="w-[60%] h-full p-8  overflow-scroll max-h-[95vh]">
-        <div className="h-[50%] overflow-auto">
-          <div className="text-left text-sky-900 font-black text-lg mb-2 flex justify-between">
-            <div>Danh sách nợ</div>
-          </div>
-          <Table dataSource={dataSource} columns={columns} />
-        </div>
-        <div className="h-[50%] overflow-auto">
-          <div className="text-left text-sky-900 font-black text-lg mb-2 flex justify-between">
-            <div>Danh sách chưa thanh toán</div>
-          </div>
-          <Table dataSource={dataSource} columns={columns} />
-        </div>
-      </div>
-    </div>
+      <Modal
+        afterClose={() => {
+          setShowInputOTP(false);
+          setExpired(false);
+          form.resetFields();
+        }}
+        destroyOnClose
+        title="Xác nhận thanh toán"
+        centered
+        open={isOpenModalTransfer}
+        okType="primary"
+        footer={null}
+        onOk={() => setIsOpenModalTransfer(false)}
+        onCancel={() => setIsOpenModalTransfer(false)}
+      >
+        {!showInputOTP && (
+          <>
+            <div className="text-center text-lg font-medium">
+              Vui lòng nhập OTP để xác nhận thanh toán
+            </div>
+            <div
+              className="text-center text-base underline text-cyan-800 cursor-pointer"
+              onClick={sendOTP}
+            >
+              Gửi OTP qua Email của bạn
+            </div>
+          </>
+        )}
+        {showInputOTP && (
+          <Form {...formItemLayout} className="mt-8" form={form} onFinish={submitTransfer}>
+            <Form.Item
+              rules={[
+                {
+                  required: true,
+                  message: 'Vui lòng nhập OTP',
+                },
+              ]}
+              label="OTP"
+              name="otp"
+            >
+              <InputNumber className="w-full" type="number" placeholder="Nhập OTP" />
+            </Form.Item>
+            <div className="flex items-center justify-center mt-1">
+              <CountDown timeOTP={timeOTP} setExpired={setExpired} />
+              <Button disabled={!expired} type="link">
+                <div className="underline" onClick={reSendOTP}>
+                  Gửi lại OTP
+                </div>
+              </Button>
+            </div>
+            <Form.Item hidden label="id" name="idOwe">
+              <Input hidden />
+            </Form.Item>
+            <Form.Item hidden label="id" name="cardFrom">
+              <Input hidden />
+            </Form.Item>
+            <Form.Item hidden label="id" name="cardTo">
+              <Input hidden />
+            </Form.Item>
+            <Form.Item hidden label="id" name="bankTo">
+              <Input hidden />
+            </Form.Item>
+            <Form.Item hidden label="id" name="bankFrom">
+              <Input hidden />
+            </Form.Item>
+            <Form.Item hidden label="id" name="numberMoney">
+              <Input hidden />
+            </Form.Item>
+            <Form.Item className="flex justify-end">
+              <Button
+                type="primary"
+                htmlType="submit"
+                className="login-form-button bg-sky-600 mt-2"
+              >
+                Xác nhận
+              </Button>
+            </Form.Item>
+          </Form>
+        )}
+      </Modal>
+    </>
   );
 };

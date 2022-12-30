@@ -52,6 +52,11 @@ const columnsHistory = [
     key: 'numberMoney',
   },
   {
+    title: 'Nội dung',
+    dataIndex: 'description',
+    key: 'description',
+  },
+  {
     title: 'Thời gian',
     dataIndex: 'atTime',
     key: 'atTime',
@@ -81,7 +86,7 @@ export default function Home() {
       key: 'bank',
     },
     {
-      title: 'Action',
+      title: 'Thao tác',
       key: 'action',
       render: (_: any, record: any) => (
         <Space size="middle">
@@ -91,7 +96,7 @@ export default function Home() {
               editUserRecommend(record.id, record.numberCardFrom);
             }}
           >
-            Edit
+            Sửa
           </button>
           <button
             className="underline italic font-medium text-sky-600 hover:text-sky-800"
@@ -99,7 +104,7 @@ export default function Home() {
               removeUserRecommend(record.id);
             }}
           >
-            Delete
+            Hủy
           </button>
         </Space>
       ),
@@ -147,6 +152,7 @@ export default function Home() {
       type: string;
       nameFrom: string;
       nameTo: string;
+      description: string;
       numberMoney: string;
       atTime: string;
     }[]
@@ -176,6 +182,7 @@ export default function Home() {
         type: el.type === 1 ? 'Chuyển đi' : 'Nhận về',
         nameFrom: el.hoTenNguoiGui,
         nameTo: el.hoTenNguoiNhan,
+        description: el.noiDung,
         numberMoney: `${formatNumberCurrent(el.soTienChuyen) || 0} VND`,
         atTime: moment(el.create_at).format('h:mm:ss, DD/MM/YYYY'),
       };
@@ -333,7 +340,6 @@ export default function Home() {
     nameRecommend: string;
   }) => {
     const { nameRecommendEdit, idUserRecommend, nameRecommend } = values;
-    console.log('name', nameRecommend);
     mutateEditUserRecommend(
       {
         id: idUserRecommend,
@@ -365,8 +371,8 @@ export default function Home() {
   return (
     <>
       <div className="w-full h-full flex">
-        <div className=" w-[40%] bg-slate-200 h-full p-6 overflow-scroll max-h-[95vh]">
-          <div>
+        <div className=" w-[45%] bg-slate-200 h-full p-6 overflow-scroll max-h-[95vh]">
+          <>
             <CardATM
               numberCard={dataCardUser?.maTaiKhoan || ''}
               nameCard={dataCardUser?.hoTen || ''}
@@ -376,28 +382,24 @@ export default function Home() {
               classCss="w-[90%] mt-7 ml-2"
             ></MoneyUser>
             <Divider dashed type="horizontal" className="bg-sky-600" />
+          </>
+          <div className="text-left text-sky-900 font-black text-lg mb-2 flex justify-between">
+            <div>Danh sách người quen</div>
+            <Button
+              type="primary"
+              onClick={() => {
+                setIsOpenModalAdd(true);
+              }}
+              className="bg-blue-400 hover:text-white"
+            >
+              Thêm
+            </Button>
           </div>
+          <Table dataSource={dataUserRecommend} columns={columns} />
         </div>
-        <div className="w-[60%] h-full p-8  overflow-scroll max-h-[95vh]">
-          <div>
-            <div className="text-left text-sky-900 font-black text-lg mb-2 flex justify-between">
-              <div>Danh sách người nhận</div>
-              <Button
-                type="primary"
-                onClick={() => {
-                  setIsOpenModalAdd(true);
-                }}
-                className="bg-blue-400 hover:text-white"
-              >
-                Thêm
-              </Button>
-            </div>
-            <Table dataSource={dataUserRecommend} columns={columns} />
-          </div>
-          <div>
-            <div className="text-left text-sky-900 font-black text-lg mb-2">Lịch sử giao dịch</div>
-            <Table dataSource={dataHistory} columns={columnsHistory} />
-          </div>
+        <div className="w-[55%] h-full p-8  overflow-scroll max-h-[95vh]">
+          <div className="text-left text-sky-900 font-black text-lg mb-2">Lịch sử giao dịch</div>
+          <Table dataSource={dataHistory} columns={columnsHistory} />
         </div>
       </div>
       {/* Modal Add */}
@@ -494,7 +496,6 @@ export default function Home() {
           </Form.Item>
         </Form>
       </Modal>
-      ƒ
     </>
   );
 }

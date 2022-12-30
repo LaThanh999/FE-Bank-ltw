@@ -1,7 +1,14 @@
 import { Button, Form, Input, Select } from 'antd';
 import { useEffect } from 'react';
+import { BankDTO } from 'types/bank';
 
-export const SendPrivateUserNew = () => {
+export const SendPrivateUserNew = ({
+  callBack,
+  dataBanks,
+}: {
+  callBack: () => unknown;
+  dataBanks: BankDTO[] | undefined;
+}) => {
   const { Option } = Select;
   const { TextArea } = Input;
 
@@ -28,7 +35,7 @@ export const SendPrivateUserNew = () => {
 
   return (
     <div className="flex justify-center items-center">
-      <div className="w-[50%] mt-8">
+      <div className="w-[75%] mt-8">
         <Form {...formItemLayout} form={form} className="login-form" onFinish={onFinish}>
           <Form.Item
             required

@@ -13,5 +13,6 @@ export interface HistoryExchangeDTO {
   update_at: string;
   hoTenNguoiNhan: string;
   hoTenNguoiGui: string;
+  noiDung: string;
   type: number;
 }

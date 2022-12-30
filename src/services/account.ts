@@ -93,3 +93,57 @@ export const GetUserByNumberCardServer = async (numberAccount: string): Promise<
     return Promise.reject(error);
   }
 };
+
+export const GetUserByNumberCardWithBankIdServer = async ({
+  numberCard,
+  bankId,
+}: {
+  numberCard: string;
+  bankId: string;
+}): Promise<AccountDTO> => {
+  try {
+    const { data } = await axios.post<AccountDTO>(`/taiKhoan/getWithNumberCardAndBankId`, {
+      numberCard,
+      bankId,
+    });
+    return data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const TransferServer = async ({
+  soTaiKhoanGui,
+  soTaiKhoanNhan,
+  soTien,
+  noiDung,
+  idNganHangNhan,
+  idNganHangGui,
+  idLoaiGiaoDich,
+  traPhi,
+}: {
+  soTaiKhoanGui: string;
+  soTaiKhoanNhan: string;
+  soTien: number;
+  noiDung: string;
+  idNganHangNhan: number;
+  idNganHangGui: number;
+  idLoaiGiaoDich: number;
+  traPhi: 0 | 1;
+}) => {
+  try {
+    const { data } = await axios.post(`/taiKhoanNganHang/transfer`, {
+      soTaiKhoanGui,
+      soTaiKhoanNhan,
+      soTien,
+      noiDung,
+      idNganHangNhan,
+      idNganHangGui,
+      idLoaiGiaoDich,
+      traPhi,
+    });
+    return data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
