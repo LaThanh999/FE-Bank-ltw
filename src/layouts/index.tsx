@@ -45,14 +45,23 @@ const items: MenuItem[] = [
       getItem({ label: 'Liên ngân hàng', key: '3' }),
     ],
   }),
+  // getItem({
+  //   label: 'Nhắc nợ',
+  //   key: '5',
+  //   icon: <DesktopOutlined />,
+  // }),
   getItem({
     label: 'Nhắc nợ',
-    key: '5',
+    key: '',
     icon: <DesktopOutlined />,
+    children: [
+      getItem({ label: 'Danh sách', key: '4' }),
+      getItem({ label: 'Chưa thanh toán', key: '5' }),
+    ],
   }),
   getItem({
     label: 'Cá nhân',
-    key: '4',
+    key: '6',
     icon: <UserOutlined />,
   }),
 ];
@@ -72,10 +81,12 @@ const LayoutContainer = () => {
         return '2';
       case '/send-public':
         return '3';
-      case '/account':
-        return '4';
       case '/owe':
+        return '4';
+      case '/my-owe':
         return '5';
+      case '/account':
+        return '6';
       default:
         return '1';
     }
@@ -99,10 +110,13 @@ const LayoutContainer = () => {
         router.push('/send-public');
         return;
       case '4':
-        router.push('/account');
+        router.push('/owe');
         return;
       case '5':
-        router.push('/owe');
+        router.push('/my-owe');
+        return;
+      case '6':
+        router.push('/account');
         return;
       default:
         router.push('/home');

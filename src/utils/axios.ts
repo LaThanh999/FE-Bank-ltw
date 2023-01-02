@@ -34,7 +34,6 @@ axios.interceptors.response.use(
       originalRequest._retry = true;
       const accessToken = localStorage.getItem(ACCESS_TOKEN);
       const refreshToken = localStorage.getItem(REFRESH_TOKEN);
-      console.log({ accessToken, refreshToken });
       try {
         const { data } = await axios.post('/dangnhap/refreshToken', {
           accessToken,

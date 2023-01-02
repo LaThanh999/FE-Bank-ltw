@@ -88,6 +88,18 @@ export default function Login() {
             <ReCAPTCHA sitekey="6Lf_qIcjAAAAAANkzfwrMXTgZFHeEb6pl7ufaqlT" ref={captchaRef} />
           </Form.Item>
 
+          <Form.Item className="flex justify-end">
+            <Button
+              type="link"
+              className="underline"
+              onClick={() => {
+                router.push('/forgot-password');
+              }}
+            >
+              Quên mật khẩu ?
+            </Button>
+          </Form.Item>
+
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button className="bg-primary" type="primary" htmlType="submit">
               Đăng nhập

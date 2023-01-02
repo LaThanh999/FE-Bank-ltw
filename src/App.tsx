@@ -9,6 +9,7 @@ import Login from 'pages/Login';
 import { ConfigProvider } from 'antd';
 import historyRouter from 'utils/history';
 import LayoutContainer from 'layouts';
+import ForgotPasswordPage from 'pages/ForgotPassword';
 
 function App() {
   const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ function App() {
                   ))}
                 </Route>
                 <Route path="/login" element={<Login />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               </Routes>
             </HistoryRouter>
           </QueryClientProvider>

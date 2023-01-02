@@ -3,7 +3,7 @@ import { Button, Divider, Form, Input, Modal, notification, Select, Space, Table
 import { CardATM } from 'components/CardATM';
 import { SpinnerComponent } from 'components/Common/Spin';
 import { MoneyUser } from 'components/MoneyUser';
-import { CARD_ID, USER_ID } from 'constants/common';
+import { CARD_ID, ID_BANK_LTW, USER_ID } from 'constants/common';
 import { formatNumberCurrent } from 'helper/number';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
@@ -134,9 +134,13 @@ export default function Home() {
     data: dataRecommend,
     isLoading: isLoadingRecommend,
     refetch: refetchDataRecommend,
-  } = useQuery(['getUserRecommend'], () => GetUserRecommendServer(carId as string), {
-    refetchOnWindowFocus: false,
-  });
+  } = useQuery(
+    ['getUserRecommend'],
+    () => GetUserRecommendServer({ accountNumber: carId as string }),
+    {
+      refetchOnWindowFocus: false,
+    },
+  );
   const { data: dataBanks } = useQuery(['getBanks'], () => GetBanksServer(), {
     refetchOnWindowFocus: false,
   });
@@ -437,7 +441,7 @@ export default function Home() {
                 message: 'Vui lòng chọn ngân hàng',
               },
             ]}
-            initialValue={4}
+            initialValue={ID_BANK_LTW}
             label="Ngân hàng"
             name="bank"
           >
@@ -446,7 +450,7 @@ export default function Home() {
                 value: el.id,
                 label: el.tenNganHang,
               }))}
-              defaultValue={4}
+              defaultValue={ID_BANK_LTW}
             ></Select>
           </Form.Item>
           <Form.Item className="flex justify-end">
@@ -479,14 +483,14 @@ export default function Home() {
           <Form.Item label="Số tài khoản" name="numberCardEdit">
             <Input disabled type="number" />
           </Form.Item>
-          <Form.Item initialValue={4} label="Ngân hàng" name="bankEdit">
+          <Form.Item initialValue={ID_BANK_LTW} label="Ngân hàng" name="bankEdit">
             <Select
               disabled
               options={dataBanks?.map((el) => ({
                 value: el.id,
                 label: el.tenNganHang,
               }))}
-              defaultValue={4}
+              defaultValue={ID_BANK_LTW}
             ></Select>
           </Form.Item>
           <Form.Item className="flex justify-end">

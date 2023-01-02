@@ -22,9 +22,11 @@ export const GetHistoryServer = async (accountNumber: string): Promise<HistoryEx
   }
 };
 
-export const GetUserRecommendServer = async (
-  accountNumber: string,
-): Promise<UserRecommendDTO[]> => {
+export const GetUserRecommendServer = async ({
+  accountNumber,
+}: {
+  accountNumber: string;
+}): Promise<UserRecommendDTO[]> => {
   try {
     const { data } = await axios.get<UserRecommendDTO[]>(
       `/danhSachNguoiNhan/getByAccountNumber/${accountNumber}`,

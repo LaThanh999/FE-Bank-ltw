@@ -5,7 +5,6 @@ import { SpinnerComponent } from 'components/Common/Spin';
 import { MoneyUser } from 'components/MoneyUser';
 import { USER_ID } from 'constants/common';
 import { GetMoneyUserServer } from 'services/account';
-import { GetBanksServer } from 'services/bank';
 import { SendPrivateUserNew } from './component/UserNew';
 import { SendPrivateUserOld } from './component/UserOld';
 
@@ -17,10 +16,6 @@ export const SendPrivate = () => {
     isLoading: isLoadingGetMoney,
     refetch: refetchDataMoney,
   } = useQuery(['getMony'], () => GetMoneyUserServer(userId as string), {
-    refetchOnWindowFocus: false,
-  });
-
-  const { data: dataBanks } = useQuery(['getBanks'], () => GetBanksServer(), {
     refetchOnWindowFocus: false,
   });
 
@@ -50,12 +45,12 @@ export const SendPrivate = () => {
               {
                 label: `Người quen`,
                 key: '1',
-                children: <SendPrivateUserOld dataBanks={dataBanks} callBack={refetchDataMoney} />,
+                children: <SendPrivateUserOld callBack={refetchDataMoney} />,
               },
               {
                 label: `Tài khoản mới`,
                 key: '2',
-                children: <SendPrivateUserNew dataBanks={dataBanks} callBack={refetchDataMoney} />,
+                children: <SendPrivateUserNew callBack={refetchDataMoney} />,
               },
             ]}
           />
