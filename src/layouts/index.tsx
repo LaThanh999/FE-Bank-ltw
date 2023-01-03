@@ -3,6 +3,7 @@ import { DesktopOutlined, UserOutlined, LaptopOutlined } from '@ant-design/icons
 import { Layout, Menu, theme, MenuProps } from 'antd';
 import { useRouter } from 'hooks/useRouter';
 import { Outlet } from 'react-router-dom';
+import { TYPE, USER_TYPE } from 'constants/common';
 
 const { Content, Sider } = Layout;
 
@@ -45,11 +46,6 @@ const items: MenuItem[] = [
       getItem({ label: 'Liên ngân hàng', key: '3' }),
     ],
   }),
-  // getItem({
-  //   label: 'Nhắc nợ',
-  //   key: '5',
-  //   icon: <DesktopOutlined />,
-  // }),
   getItem({
     label: 'Nhắc nợ',
     key: '',
@@ -66,12 +62,21 @@ const items: MenuItem[] = [
   }),
 ];
 
+const itemsEmployee: MenuItem[] = [
+  getItem({
+    label: 'Trang chủ',
+    key: 'employee-1',
+    icon: <DesktopOutlined />,
+  }),
+];
+
 const LayoutContainer = () => {
   const [collapsed, setCollapsed] = useState(false);
   const {
     token: { colorBgContainer },
   } = theme.useToken();
   const router = useRouter();
+  const typeUser = localStorage.getItem(TYPE);
 
   const keyPath = (value: string) => {
     switch (value) {
@@ -92,15 +97,51 @@ const LayoutContainer = () => {
     }
   };
 
+  const keyPathEmployee = (value: string) => {
+    switch (value) {
+      case '/home':
+        return 'employee-1';
+      default:
+        return 'employee-1';
+    }
+  };
+
   const [selectedItem, setSelectedItem] = useState<string[]>([]);
+  const [selectedItemEmployee, setSelectedItemEmployee] = useState<string[]>([]);
 
   useEffect(() => {
     setSelectedItem([keyPath(router.location.pathname)]);
+    setSelectedItemEmployee([keyPathEmployee(router.location.pathname)]);
   }, [router.location]);
 
   const onClickMenu = (item: any) => {
     switch (item.key) {
       case '1':
+        router.push('/home');
+        return;
+      case '2':
+        router.push('/send-private');
+        return;
+      case '3':
+        router.push('/send-public');
+        return;
+      case '4':
+        router.push('/owe');
+        return;
+      case '5':
+        router.push('/my-owe');
+        return;
+      case '6':
+        router.push('/account');
+        return;
+      default:
+        router.push('/home');
+    }
+  };
+
+  const onClickMenuEmployee = (item: any) => {
+    switch (item.key) {
+      case 'employee-1':
         router.push('/home');
         return;
       case '2':
@@ -132,14 +173,26 @@ const LayoutContainer = () => {
         >
           Bank LTW
         </div>
-        <Menu
-          onClick={onClickMenu}
-          theme="dark"
-          selectedKeys={selectedItem}
-          defaultSelectedKeys={[items[0]?.key as string]}
-          mode="inline"
-          items={items}
-        ></Menu>
+        {Number(typeUser) === USER_TYPE.customer && (
+          <Menu
+            onClick={onClickMenu}
+            theme="dark"
+            selectedKeys={selectedItem}
+            defaultSelectedKeys={[items[0]?.key as string]}
+            mode="inline"
+            items={items}
+          ></Menu>
+        )}
+        {Number(typeUser) === USER_TYPE.employee && (
+          <Menu
+            onClick={onClickMenuEmployee}
+            theme="dark"
+            selectedKeys={selectedItemEmployee}
+            defaultSelectedKeys={[itemsEmployee[0]?.key as string]}
+            mode="inline"
+            items={itemsEmployee}
+          ></Menu>
+        )}
       </Sider>
       <Layout className="site-layout" hasSider={false}>
         <Content style={{ margin: '20px' }}>

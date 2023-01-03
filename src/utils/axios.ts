@@ -2,7 +2,9 @@ import Axios from 'axios';
 import { ACCESS_TOKEN, REFRESH_TOKEN } from 'constants/common';
 import historyRouter from 'utils/history';
 
-const BASE_URL = 'http://localhost:3008';
+// const BASE_URL = 'https://bankltw.onrender.com';
+
+const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:3008';
 
 export const socketURL = BASE_URL;
 

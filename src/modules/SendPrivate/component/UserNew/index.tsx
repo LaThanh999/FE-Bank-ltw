@@ -189,7 +189,6 @@ export const SendPrivateUserNew = ({ callBack }: { callBack: () => unknown }) =>
                       { accountFrom: carId, accountTo: numberCard },
                       {
                         onSuccess: (data) => {
-                          console.log('data', data);
                           if (!data || !data.id) {
                             Modal.confirm({
                               zIndex: 10,

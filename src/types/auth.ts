@@ -9,4 +9,5 @@ export interface AuthDTO {
   refreshToken: string;
   userId: number;
   maTaiKhoan: string;
+  type: number;
 }

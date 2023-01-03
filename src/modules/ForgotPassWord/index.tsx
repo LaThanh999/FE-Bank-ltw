@@ -140,6 +140,18 @@ export default function ForgotPassword() {
             >
               <Input />
             </Form.Item>
+            <Form.Item className="flex justify-end">
+              <Button
+                type="link"
+                className="underline"
+                onClick={() => {
+                  router.push('/login');
+                }}
+              >
+                Đăng nhập
+              </Button>
+            </Form.Item>
+
             <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
               <Button className="bg-primary" type="primary" htmlType="submit">
                 Gửi OTP
@@ -192,7 +204,7 @@ export default function ForgotPassword() {
           <Form
             form={form}
             name="basic"
-            labelCol={{ span: 8 }}
+            labelCol={{ span: 10 }}
             wrapperCol={{ span: 16 }}
             initialValues={{ remember: true }}
             onFinish={updatePassword}
