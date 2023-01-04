@@ -117,7 +117,7 @@ export default function Home() {
   const userId = localStorage.getItem(USER_ID);
   const carId = localStorage.getItem(CARD_ID);
   const { data: dataCardUser, isLoading: isLoadingGetMoney } = useQuery(
-    ['getMony'],
+    ['getMoney'],
     () => GetMoneyUserServer(userId as string),
     {
       refetchOnWindowFocus: false,
@@ -125,7 +125,7 @@ export default function Home() {
   );
   const { data: dataHistories, isLoading: isLoadingHistory } = useQuery(
     ['getHistory'],
-    () => GetHistoryServer(carId as string),
+    () => GetHistoryServer({ cardNumber: carId as string }),
     {
       refetchOnWindowFocus: false,
     },

@@ -1,4 +1,11 @@
-import { AccountDTO, ParamsAddUserRecommend, UserMoneyDTO, UserRecommendDTO } from 'types/account';
+import {
+  AccountDTO,
+  ParamsAddCustomerDTO,
+  ParamsAddUserRecommend,
+  UserCustomerDTO,
+  UserMoneyDTO,
+  UserRecommendDTO,
+} from 'types/account';
 import { HistoryExchangeDTO } from 'types/history';
 import axios from 'utils/axios';
 
@@ -11,11 +18,19 @@ export const GetMoneyUserServer = async (idUser: string): Promise<UserMoneyDTO> 
   }
 };
 
-export const GetHistoryServer = async (accountNumber: string): Promise<HistoryExchangeDTO[]> => {
+export const GetHistoryServer = async ({
+  cardNumber,
+  type,
+}: {
+  cardNumber: string;
+  type?: number;
+}): Promise<HistoryExchangeDTO[]> => {
   try {
-    const { data } = await axios.get<HistoryExchangeDTO[]>(
-      `/lichSuGiaoDich/getByAccountNumber/${accountNumber}`,
-    );
+    const { data } = !type
+      ? await axios.get<HistoryExchangeDTO[]>(`/lichSuGiaoDich/getByAccountNumber/${cardNumber}`)
+      : await axios.get<HistoryExchangeDTO[]>(
+          `/lichSuGiaoDich/getByAccountNumber/${cardNumber}/${type}`,
+        );
     return data;
   } catch (error) {
     return Promise.reject(error);
@@ -144,6 +159,56 @@ export const TransferServer = async ({
       idLoaiGiaoDich,
       traPhi,
     });
+    return data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const GetCustomerServer = async (): Promise<UserCustomerDTO[]> => {
+  try {
+    const { data } = await axios.get<UserCustomerDTO[]>(`/taiKhoan/getAllCustomer`);
+    return data || [];
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const GetUserByNumberCardWithMoneyServer = async ({
+  cardNumber,
+}: {
+  cardNumber: string;
+}): Promise<UserCustomerDTO> => {
+  try {
+    const { data } = await axios.get<UserCustomerDTO>(
+      `/taiKhoan/getWithNumberCardWithMoney/${cardNumber}`,
+    );
+    return data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const GetUserByNumberCardOrEmailPhone = async ({
+  inputSearch,
+}: {
+  inputSearch: string;
+}): Promise<UserCustomerDTO> => {
+  try {
+    const { data } = await axios.post<UserCustomerDTO>(`/taiKhoan/getWithNumberCardOrEmailPhone`, {
+      inputSearch,
+    });
+    return data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const AddCustomerServer = async (
+  params: ParamsAddCustomerDTO,
+): Promise<{ status: number }> => {
+  try {
+    const { data } = await axios.post<{ status: number }>(`/taiKhoan/addCustomer`, params);
     return data;
   } catch (error) {
     return Promise.reject(error);

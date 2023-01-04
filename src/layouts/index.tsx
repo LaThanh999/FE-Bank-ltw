@@ -68,6 +68,16 @@ const itemsEmployee: MenuItem[] = [
     key: 'employee-1',
     icon: <DesktopOutlined />,
   }),
+  getItem({
+    label: 'Khách hàng',
+    key: 'sub-employee-1',
+    icon: <LaptopOutlined />,
+    children: [
+      getItem({ label: 'Chi tiết', key: 'employee-2' }),
+      getItem({ label: 'Nạp tiền', key: 'employee-3' }),
+      getItem({ label: 'Thêm khách hàng', key: 'employee-4' }),
+    ],
+  }),
 ];
 
 const LayoutContainer = () => {
@@ -99,8 +109,12 @@ const LayoutContainer = () => {
 
   const keyPathEmployee = (value: string) => {
     switch (value) {
-      case '/home':
+      case '/home-employee':
         return 'employee-1';
+      case '/customer-detail':
+        return 'employee-2';
+      case '/add-customer':
+        return 'employee-4';
       default:
         return 'employee-1';
     }
@@ -142,25 +156,16 @@ const LayoutContainer = () => {
   const onClickMenuEmployee = (item: any) => {
     switch (item.key) {
       case 'employee-1':
-        router.push('/home');
+        router.push('/home-employee');
         return;
-      case '2':
-        router.push('/send-private');
+      case 'employee-2':
+        router.push('/customer-detail');
         return;
-      case '3':
-        router.push('/send-public');
-        return;
-      case '4':
-        router.push('/owe');
-        return;
-      case '5':
-        router.push('/my-owe');
-        return;
-      case '6':
-        router.push('/account');
+      case 'employee-4':
+        router.push('/add-customer');
         return;
       default:
-        router.push('/home');
+        router.push('/home-employee');
     }
   };
 

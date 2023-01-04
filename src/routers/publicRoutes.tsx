@@ -1,5 +1,8 @@
 import AccountPage from 'pages/Account';
+import { AddCustomerPage } from 'pages/AddCustomer';
+import { CustomerDetailPage } from 'pages/CustomerDetail';
 import HomePage from 'pages/Home';
+import { HomeEmployeePage } from 'pages/HomeEmployee';
 import { MyOwePage } from 'pages/MyOwe';
 import { OwePage } from 'pages/Owe';
 import SendPrivatePage from 'pages/SendPrivate';
@@ -33,6 +36,19 @@ const publicRoutes = [
   {
     path: '/my-owe',
     element: <MyOwePage />,
+  },
+  // employee
+  {
+    path: '/home-employee',
+    element: <HomeEmployeePage />,
+  },
+  {
+    path: '/customer-detail',
+    element: <CustomerDetailPage />,
+  },
+  {
+    path: '/add-customer',
+    element: <AddCustomerPage />,
   },
 ];
 

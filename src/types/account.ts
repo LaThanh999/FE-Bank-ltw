@@ -38,3 +38,26 @@ export interface ParamsAddUserRecommend {
   idNganHang: string;
   create_at: string;
 }
+
+export interface UserCustomerDTO {
+  id: number;
+  taiKhoan: string;
+  hoTen: string;
+  email: string;
+  sdt: string;
+  loaiTaiKhoan: number;
+  maTaiKhoan: string;
+  OTP: string;
+  refreshToken: string;
+  create_at: any;
+  update_at: string;
+  maNganHang: number;
+  soDu: string;
+}
+
+export interface ParamsAddCustomerDTO {
+  username: string;
+  fullName: string;
+  email: string;
+  phone: string;
+}
