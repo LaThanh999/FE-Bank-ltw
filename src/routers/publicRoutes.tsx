@@ -5,6 +5,7 @@ import HomePage from 'pages/Home';
 import { HomeEmployeePage } from 'pages/HomeEmployee';
 import { MyOwePage } from 'pages/MyOwe';
 import { OwePage } from 'pages/Owe';
+import { RechargeMoneyPage } from 'pages/RechargeMoney';
 import SendPrivatePage from 'pages/SendPrivate';
 import SendPublicPage from 'pages/SendPublic';
 
@@ -49,6 +50,10 @@ const publicRoutes = [
   {
     path: '/add-customer',
     element: <AddCustomerPage />,
+  },
+  {
+    path: '/recharge-money',
+    element: <RechargeMoneyPage />,
   },
 ];
 

@@ -113,6 +113,8 @@ const LayoutContainer = () => {
         return 'employee-1';
       case '/customer-detail':
         return 'employee-2';
+      case '/recharge-money':
+        return 'employee-3';
       case '/add-customer':
         return 'employee-4';
       default:
@@ -160,6 +162,9 @@ const LayoutContainer = () => {
         return;
       case 'employee-2':
         router.push('/customer-detail');
+        return;
+      case 'employee-3':
+        router.push('/recharge-money');
         return;
       case 'employee-4':
         router.push('/add-customer');
