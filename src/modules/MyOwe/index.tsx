@@ -4,11 +4,13 @@ import { CountDown } from 'components/Common/CountDown';
 import { SpinnerComponent } from 'components/Common/Spin';
 import { CARD_ID, timeExpiredMinutes } from 'constants/common';
 import { formatNumberCurrent } from 'helper/number';
+import { useSocket } from 'hooks/useSocket';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { TransferServer } from 'services/account';
 import { isVerifyOTPTransferServer, sendOTPTransferServer } from 'services/otpTransfer';
 import {
+  AddNotifyOweServer,
   EditStatusOweServer,
   GetOweByNumberAccountServer,
   RemoveOweRecommendServer,
@@ -32,6 +34,7 @@ export const MyOwe = () => {
   const [showInputOTP, setShowInputOTP] = useState(false);
   const [timeOTP, setTimeOTP] = useState<any>();
   const [expired, setExpired] = useState(false);
+  const { sendSocket } = useSocket();
 
   const [dataIsOweState, setDataIsOweState] = useState<
     {
@@ -122,6 +125,7 @@ export const MyOwe = () => {
   const { mutate: mutateEditOwe } = useMutation(EditStatusOweServer);
   const { mutate: mutateSendOTP } = useMutation(sendOTPTransferServer);
   const { mutate: mutateVerifyOtp } = useMutation(isVerifyOTPTransferServer);
+  const { mutate: mutateAddNotify } = useMutation(AddNotifyOweServer);
 
   useEffect(() => {
     const dataTemp = dataIsOwe?.map((el, index) => {
@@ -211,6 +215,18 @@ export const MyOwe = () => {
               },
               {
                 onSuccess: () => {
+                  mutateAddNotify(
+                    {
+                      numberCardFrom: cardFrom,
+                      numberCardTo: cardTo,
+                      numberOfMoney: numberMoney,
+                    },
+                    {
+                      onSuccess: () => {
+                        sendSocket('updated owe');
+                      },
+                    },
+                  );
                   mutateEditOwe(
                     { id: idOwe, status: 1 },
                     {

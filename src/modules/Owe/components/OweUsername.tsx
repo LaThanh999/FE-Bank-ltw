@@ -2,6 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { Button, Form, Input, InputNumber, notification, Select } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { CARD_ID } from 'constants/common';
+import { useSocket } from 'hooks/useSocket';
 import { GetUserRecommendServer } from 'services/account';
 import { AddOweServer } from 'services/owe';
 import { BankDTO } from 'types/bank';
@@ -25,6 +26,7 @@ export const OweUsername = ({
 }) => {
   const [form] = Form.useForm();
   const carId = localStorage.getItem(CARD_ID) as string;
+  const { sendSocket } = useSocket();
 
   const { data: dataRecommend } = useQuery(
     ['getUserRecommend'],
@@ -72,6 +74,7 @@ export const OweUsername = ({
       },
       {
         onSuccess: () => {
+          sendSocket('update owe username');
           notification.success({
             message: `Thành công`,
             description: `Thêm thành công`,

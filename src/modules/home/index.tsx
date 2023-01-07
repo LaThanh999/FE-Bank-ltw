@@ -5,6 +5,7 @@ import { SpinnerComponent } from 'components/Common/Spin';
 import { MoneyUser } from 'components/MoneyUser';
 import { CARD_ID, ID_BANK_LTW, USER_ID } from 'constants/common';
 import { formatNumberCurrent } from 'helper/number';
+import { useSocket } from 'hooks/useSocket';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import {
@@ -116,13 +117,16 @@ export default function Home() {
   const [isOpenModalEdit, setIsOpenModalEdit] = useState(false);
   const userId = localStorage.getItem(USER_ID);
   const carId = localStorage.getItem(CARD_ID);
-  const { data: dataCardUser, isLoading: isLoadingGetMoney } = useQuery(
-    ['getMoney'],
-    () => GetMoneyUserServer(userId as string),
-    {
-      refetchOnWindowFocus: false,
-    },
-  );
+
+  const { messageReceiveSocket } = useSocket();
+
+  const {
+    data: dataCardUser,
+    isLoading: isLoadingGetMoney,
+    refetch: refetchGetMoney,
+  } = useQuery(['getMoney'], () => GetMoneyUserServer(userId as string), {
+    refetchOnWindowFocus: false,
+  });
   const { data: dataHistories, isLoading: isLoadingHistory } = useQuery(
     ['getHistory'],
     () => GetHistoryServer({ cardNumber: carId as string }),
@@ -141,9 +145,15 @@ export default function Home() {
       refetchOnWindowFocus: false,
     },
   );
+
+  useEffect(() => {
+    refetchGetMoney();
+  }, [messageReceiveSocket]);
+
   const { data: dataBanks } = useQuery(['getBanks'], () => GetBanksServer(), {
     refetchOnWindowFocus: false,
   });
+
   const { mutate: mutateAddUserRecommend } = useMutation(AddUserRecommendServer);
   const { mutate: mutateRemoveUserRecommend } = useMutation(RemoveUserRecommendServer);
   const { mutate: mutateEditUserRecommend } = useMutation(EditUserRecommendServer);

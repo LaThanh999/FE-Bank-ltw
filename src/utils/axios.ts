@@ -4,7 +4,7 @@ import historyRouter from 'utils/history';
 
 // const BASE_URL = 'https://bankltw.onrender.com';
 
-const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:3008';
+export const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:3008';
 
 export const socketURL = BASE_URL;
 

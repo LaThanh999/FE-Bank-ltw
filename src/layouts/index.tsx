@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { DesktopOutlined, UserOutlined, LaptopOutlined } from '@ant-design/icons';
-import { Layout, Menu, theme, MenuProps } from 'antd';
+import { DesktopOutlined, UserOutlined, LaptopOutlined, MessageOutlined } from '@ant-design/icons';
+import { Layout, Menu, theme, MenuProps, Badge, Popover, Divider } from 'antd';
 import { useRouter } from 'hooks/useRouter';
 import { Outlet } from 'react-router-dom';
-import { TYPE, USER_TYPE } from 'constants/common';
+
+import { ACCESS_TOKEN, CARD_ID, REFRESH_TOKEN, TYPE, USER_TYPE } from 'constants/common';
+import { getNotifyOweServer, UpdateSeenNotifyOweServer } from 'services/owe';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useSocket } from 'hooks/useSocket';
+import clsx from 'clsx';
 
 const { Content, Sider } = Layout;
 
@@ -31,7 +36,7 @@ function getItem({
   } as MenuItem;
 }
 
-const items: MenuItem[] = [
+const itemsMenu: MenuItem[] = [
   getItem({
     label: 'Trang chủ',
     key: '1',
@@ -78,15 +83,37 @@ const itemsEmployee: MenuItem[] = [
       getItem({ label: 'Thêm khách hàng', key: 'employee-4' }),
     ],
   }),
+  getItem({
+    label: 'Cá nhân',
+    key: 'sub-employee-2',
+    icon: <LaptopOutlined />,
+    children: [getItem({ label: 'Đăng xuất', key: 'employee-5' })],
+  }),
 ];
 
 const LayoutContainer = () => {
+  const carId = localStorage.getItem(CARD_ID) as string;
   const [collapsed, setCollapsed] = useState(false);
   const {
     token: { colorBgContainer },
   } = theme.useToken();
   const router = useRouter();
   const typeUser = localStorage.getItem(TYPE);
+  const { messageReceiveSocket } = useSocket();
+
+  const { data: dataNoti, refetch: refetchDataNoti } = useQuery(
+    ['getNotify'],
+    () => getNotifyOweServer({ numberCard: carId as string }),
+    {
+      refetchOnWindowFocus: false,
+    },
+  );
+
+  const { mutate } = useMutation(UpdateSeenNotifyOweServer);
+
+  useEffect(() => {
+    refetchDataNoti();
+  }, [messageReceiveSocket]);
 
   const keyPath = (value: string) => {
     switch (value) {
@@ -169,28 +196,83 @@ const LayoutContainer = () => {
       case 'employee-4':
         router.push('/add-customer');
         return;
+      case 'employee-5':
+        router.push('/login');
+        localStorage.removeItem(ACCESS_TOKEN);
+        localStorage.removeItem(REFRESH_TOKEN);
+        return;
       default:
         router.push('/home-employee');
     }
   };
 
+  const [open, setOpen] = useState(false);
+
+  const handleOpenChange = (newOpen: boolean) => {
+    mutate(
+      { numberCard: carId },
+      {
+        onSuccess: () => {
+          setTimeout(() => {
+            refetchDataNoti();
+          }, 1000);
+        },
+      },
+    );
+    setOpen(newOpen);
+  };
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
-        <div
-          style={{ height: 32, margin: 16, background: 'rgba(255, 255, 255, 0.2)' }}
-          className="flex justify-center items-center text-white font-bold text-lg \ rounded-lg"
+        <Popover
+          content={
+            dataNoti &&
+            dataNoti.length > 0 && (
+              <div className="w-[350px] max-h-[500px] overflow-auto">
+                <Divider dashed className="bg-sky-600" />
+                {dataNoti?.map((el, index) => (
+                  <div
+                    key={index}
+                    className={clsx('flex p-1', {
+                      ' bg-sky-100 ': el.isSeen === 0,
+                    })}
+                  >
+                    <div className="tex-base font-medium mr-2"> Từ {el.hoTenNguoiGui}: </div>
+                    <div className="tex-base font-normal">{el.message}</div>
+                  </div>
+                ))}
+              </div>
+            )
+          }
+          title="Thông báo"
+          trigger="click"
+          open={open}
+          onOpenChange={handleOpenChange}
         >
-          Bank LTW
-        </div>
+          <div
+            style={{ height: 32, margin: 16, background: 'rgba(255, 255, 255, 0.2)' }}
+            className="flex justify-center items-center text-white 
+             font-bold text-lg rounded-lg cursor-pointer"
+          >
+            <Badge size="small" count={dataNoti?.length}>
+              <div className="flex">
+                <div className="text-white font-bold text-lg mr-2">Thông báo</div>
+                {dataNoti && dataNoti.length > 0 && (
+                  <MessageOutlined style={{ fontSize: '25px', color: '#08c' }} />
+                )}
+              </div>
+            </Badge>
+          </div>
+        </Popover>
         {Number(typeUser) === USER_TYPE.customer && (
           <Menu
             onClick={onClickMenu}
             theme="dark"
             selectedKeys={selectedItem}
-            defaultSelectedKeys={[items[0]?.key as string]}
+            defaultSelectedKeys={[itemsMenu[0]?.key as string]}
             mode="inline"
-            items={items}
+            items={itemsMenu}
           ></Menu>
         )}
         {Number(typeUser) === USER_TYPE.employee && (

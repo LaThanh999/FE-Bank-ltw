@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { Button, Form, Input, InputNumber, notification } from 'antd';
+import { Button, Form, Input, InputNumber, Modal, notification } from 'antd';
 import { debounce } from 'lodash';
 import { AddMoneyCustomerServer, GetUserByNumberCardOrEmailPhone } from 'services/account';
 
@@ -30,37 +30,48 @@ export const RechargeMoney = () => {
 
   const onFinish = (values: any) => {
     const { numberOfMoney, numberCard } = values;
-    mutateAddMoney(
-      {
-        numberOfMoney,
-        numberCard,
+    Modal.confirm({
+      zIndex: 10,
+      title: 'Xác nhận',
+      content: 'Vui lòng kiểm tra lại thông tin?',
+      okText: 'Xác nhận',
+      okType: 'default',
+      centered: true,
+      cancelText: 'Hủy',
+      onOk: () => {
+        mutateAddMoney(
+          {
+            numberOfMoney,
+            numberCard,
+          },
+          {
+            onSuccess: ({ status }) => {
+              if (status === 1) {
+                notification.success({
+                  message: `Thành công`,
+                  description: `Nạp tiền vào tài khoản thành công`,
+                  placement: 'bottomRight',
+                });
+                form.resetFields();
+              } else {
+                notification.error({
+                  message: `Thất bại`,
+                  description: `Nạp tiền vào tài khoản thất bại`,
+                  placement: 'bottomRight',
+                });
+              }
+            },
+            onError: () => {
+              notification.error({
+                message: `Thất bại`,
+                description: 'Nạp tiền vào tài khoản thất bại',
+                placement: 'bottomRight',
+              });
+            },
+          },
+        );
       },
-      {
-        onSuccess: ({ status }) => {
-          if (status === 1) {
-            notification.success({
-              message: `Thành công`,
-              description: `Nạp tiền vào tài khoản thành công`,
-              placement: 'bottomRight',
-            });
-            form.resetFields();
-          } else {
-            notification.error({
-              message: `Thất bại`,
-              description: `Nạp tiền vào tài khoản thất bại`,
-              placement: 'bottomRight',
-            });
-          }
-        },
-        onError: () => {
-          notification.error({
-            message: `Thất bại`,
-            description: 'Nạp tiền vào tài khoản thất bại',
-            placement: 'bottomRight',
-          });
-        },
-      },
-    );
+    });
   };
 
   return (

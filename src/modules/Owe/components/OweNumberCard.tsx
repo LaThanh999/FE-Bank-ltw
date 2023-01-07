@@ -6,6 +6,7 @@ import { debounce } from 'lodash';
 import { useMutation } from '@tanstack/react-query';
 import { GetUserByNumberCardWithBankIdServer } from 'services/account';
 import { AddOweServer } from 'services/owe';
+import { useSocket } from 'hooks/useSocket';
 const formItemLayout = {
   labelCol: {
     xs: { span: 24 },
@@ -26,6 +27,7 @@ export const OweNumberCard = ({
 }) => {
   const [form] = Form.useForm();
   const carId = localStorage.getItem(CARD_ID) as string;
+  const { sendSocket } = useSocket();
 
   const { mutate: mutateGetUser } = useMutation(GetUserByNumberCardWithBankIdServer);
   const { mutate: mutateAdd } = useMutation(AddOweServer);
@@ -57,6 +59,7 @@ export const OweNumberCard = ({
       },
       {
         onSuccess: () => {
+          sendSocket('updated owe number card');
           notification.success({
             message: `Thành công`,
             description: `Thêm thành công`,

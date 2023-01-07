@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { Button, Form, Input, InputNumber, notification } from 'antd';
+import { Button, Form, Input, InputNumber, Modal, notification } from 'antd';
 import { AddCustomerServer } from 'services/account';
 import { ParamsAddCustomerDTO } from 'types/account';
 
@@ -9,32 +9,43 @@ export const AddCustomer = () => {
   const { mutate: mutateAdd } = useMutation(AddCustomerServer);
 
   const onFinish = (values: ParamsAddCustomerDTO) => {
-    mutateAdd(values, {
-      onSuccess: ({ status }) => {
-        if (status === 1) {
-          notification.success({
-            message: `Thành công`,
-            description: `Tạo tài khoản thành công`,
-            placement: 'bottomRight',
-          });
-          form.resetFields();
-        } else {
-          notification.error({
-            message: `Thất bại`,
-            description: `Tạo tài khoản không thành công`,
-            placement: 'bottomRight',
-          });
-        }
-      },
-      onError: (err: any) => {
-        let description;
-        if (err.response.data.status === 2) {
-          description = `Tên đăng nhập hoặc email đã được sử dụng`;
-        } else description = `Tạo tài khoản không thành công`;
-        notification.error({
-          message: `Thất bại`,
-          description,
-          placement: 'bottomRight',
+    Modal.confirm({
+      zIndex: 10,
+      title: 'Xác nhận',
+      content: 'Bạn có chắc chắn ?',
+      okText: 'Xác nhận',
+      okType: 'default',
+      centered: true,
+      cancelText: 'Hủy',
+      onOk: () => {
+        mutateAdd(values, {
+          onSuccess: ({ status }) => {
+            if (status === 1) {
+              notification.success({
+                message: `Thành công`,
+                description: `Tạo tài khoản thành công`,
+                placement: 'bottomRight',
+              });
+              form.resetFields();
+            } else {
+              notification.error({
+                message: `Thất bại`,
+                description: `Tạo tài khoản không thành công`,
+                placement: 'bottomRight',
+              });
+            }
+          },
+          onError: (err: any) => {
+            let description;
+            if (err.response.data.status === 2) {
+              description = `Tên đăng nhập hoặc email đã được sử dụng`;
+            } else description = `Tạo tài khoản không thành công`;
+            notification.error({
+              message: `Thất bại`,
+              description,
+              placement: 'bottomRight',
+            });
+          },
         });
       },
     });

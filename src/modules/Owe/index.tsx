@@ -74,7 +74,7 @@ export const Owe = () => {
     isLoading: isLoadingDataOwe,
     refetch: refetchDataOwe,
   } = useQuery(
-    ['getOwe'],
+    ['getListOwe'],
     () => GetOweByNumberAccountServer({ numberCard: carId as string, type: 1 }),
     {
       refetchOnWindowFocus: false,
@@ -166,7 +166,7 @@ export const Owe = () => {
           </div>
         </div>
         <div className="w-[60%] h-full p-8  overflow-scroll max-h-[95vh]">
-          <div className="h-[50%] overflow-auto">
+          <div className="overflow-auto">
             <div className="text-left text-sky-900 font-black text-lg mb-2 flex justify-between">
               <div>Danh sách người nợ</div>
             </div>
