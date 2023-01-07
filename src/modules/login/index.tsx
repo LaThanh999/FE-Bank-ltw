@@ -31,7 +31,7 @@ export default function Login() {
             localStorage.setItem(USER_ID, String(data.userId));
             localStorage.setItem(CARD_ID, data.maTaiKhoan);
             localStorage.setItem(TYPE, String(data.type));
-            router.push('/home');
+            router.push('/');
           },
           onError: (data: any) => {
             if (data.response.data.status === 3) {

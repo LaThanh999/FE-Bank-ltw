@@ -10,11 +10,12 @@ import { OwePage } from 'pages/Owe';
 import { RechargeMoneyPage } from 'pages/RechargeMoney';
 import SendPrivatePage from 'pages/SendPrivate';
 import SendPublicPage from 'pages/SendPublic';
+import { TransferPage } from 'pages/TransferPage';
 
 const publicRoutes = [
   {
     path: '/',
-    element: <HomePage />,
+    element: <TransferPage />,
   },
   {
     path: '/home',
