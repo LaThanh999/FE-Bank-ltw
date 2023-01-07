@@ -56,6 +56,15 @@ export interface UserCustomerDTO {
   isBlock?: number;
 }
 
+export interface UserEmployeeDTO {
+  id: number;
+  taiKhoan: string;
+  hoTen: string;
+  email: string;
+  sdt: string;
+  create_at: any;
+}
+
 export interface ParamsAddCustomerDTO {
   username: string;
   fullName: string;

@@ -3,6 +3,7 @@ import {
   ParamsAddCustomerDTO,
   ParamsAddUserRecommend,
   UserCustomerDTO,
+  UserEmployeeDTO,
   UserMoneyDTO,
   UserRecommendDTO,
 } from 'types/account';
@@ -168,6 +169,15 @@ export const TransferServer = async ({
 export const GetCustomerServer = async (): Promise<UserCustomerDTO[]> => {
   try {
     const { data } = await axios.get<UserCustomerDTO[]>(`/taiKhoan/getAllCustomer`);
+    return data || [];
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const GetEmployServer = async (): Promise<UserEmployeeDTO[]> => {
+  try {
+    const { data } = await axios.get<UserEmployeeDTO[]>(`/taiKhoan/getAllEmployee`);
     return data || [];
   } catch (error) {
     return Promise.reject(error);

@@ -1,7 +1,9 @@
 import AccountPage from 'pages/Account';
 import { AddCustomerPage } from 'pages/AddCustomer';
 import { CustomerDetailPage } from 'pages/CustomerDetail';
+import { HistoryAdminPage } from 'pages/HistoryAdmin';
 import HomePage from 'pages/Home';
+import { HomeAdminPage } from 'pages/HomeAdmin';
 import { HomeEmployeePage } from 'pages/HomeEmployee';
 import { MyOwePage } from 'pages/MyOwe';
 import { OwePage } from 'pages/Owe';
@@ -54,6 +56,15 @@ const publicRoutes = [
   {
     path: '/recharge-money',
     element: <RechargeMoneyPage />,
+  },
+  // admin
+  {
+    path: '/home-admin',
+    element: <HomeAdminPage />,
+  },
+  {
+    path: '/history-admin',
+    element: <HistoryAdminPage />,
   },
 ];
 

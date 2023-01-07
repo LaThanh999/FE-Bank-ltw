@@ -16,3 +16,24 @@ export interface HistoryExchangeDTO {
   noiDung: string;
   type: number;
 }
+
+export interface HistoryBankPublicDTO {
+  id: number;
+  maGiaoDich: string;
+  taiKhoanNguoiNhan: string;
+  taiKhoanNguoiGui: string;
+  soTienChuyen: string;
+  phiGiaoDich: string;
+  noiDung: string;
+  tienThucNhan: string;
+  idNganHangNhan: number;
+  idNganHangGui: number;
+  idLoaiGiaoDich: number;
+  ngayGioGiaoDich: string;
+  create_at: string;
+  update_at: string;
+  hoTenNguoiNhan: string;
+  hoTenNguoiGui: string;
+  tenNganHangNhan: string;
+  tenNganHangGui: string;
+}

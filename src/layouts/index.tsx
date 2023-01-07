@@ -132,6 +132,19 @@ const itemsEmployee: MenuItem[] = [
   }),
 ];
 
+const itemsAdmin: MenuItem[] = [
+  getItem({
+    label: 'Trang chủ',
+    key: 'admin-1',
+    icon: <DesktopOutlined />,
+  }),
+  getItem({
+    label: 'Lịch sử',
+    key: 'admin-2',
+    icon: <DesktopOutlined />,
+  }),
+];
+
 const LayoutContainer = () => {
   const carId = localStorage.getItem(CARD_ID) as string;
   const [collapsed, setCollapsed] = useState(false);
@@ -190,12 +203,25 @@ const LayoutContainer = () => {
     }
   };
 
+  const keyPathAdmin = (value: string) => {
+    switch (value) {
+      case '/home-admin':
+        return 'admin-1';
+      case '/history-admin':
+        return 'admin-2';
+      default:
+        return 'admin-1';
+    }
+  };
+
   const [selectedItem, setSelectedItem] = useState<string[]>([]);
   const [selectedItemEmployee, setSelectedItemEmployee] = useState<string[]>([]);
+  const [selectedItemAdmin, setSelectedItemAdmin] = useState<string[]>([]);
 
   useEffect(() => {
     setSelectedItem([keyPath(router.location.pathname)]);
     setSelectedItemEmployee([keyPathEmployee(router.location.pathname)]);
+    setSelectedItemAdmin([keyPathAdmin(router.location.pathname)]);
   }, [router.location]);
 
   const onClickMenu = (item: any) => {
@@ -244,6 +270,18 @@ const LayoutContainer = () => {
         return;
       default:
         router.push('/home-employee');
+    }
+  };
+  const onClickMenuAdmin = (item: any) => {
+    switch (item.key) {
+      case 'admin-1':
+        router.push('/home-admin');
+        return;
+      case 'admin-2':
+        router.push('/history-admin');
+        return;
+      default:
+        router.push('/home-admin');
     }
   };
 
@@ -433,61 +471,65 @@ const LayoutContainer = () => {
     );
   };
 
+  console.log('typeUser', typeUser);
+
   return (
     <>
       <Layout style={{ minHeight: '100vh' }}>
         <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
-          <Popover
-            content={
-              dataNoti &&
-              dataNoti.length > 0 && (
-                <div className="w-[350px] max-h-[500px] overflow-auto">
-                  <Divider dashed className="bg-sky-600" />
-                  {dataNoti.map((el, index) => (
-                    <div
-                      key={index}
-                      className={clsx('flex p-1', {
-                        ' bg-sky-100 ': el.isSeen === 0,
-                      })}
-                    >
-                      <div className="tex-base font-medium mr-2"> Từ {el.hoTenNguoiGui}: </div>
-                      <div className="tex-base font-normal">{el.message}</div>
-                      {el.type === 0 && el.isSeen === 0 && (
-                        <Button
-                          type="primary"
-                          className="login-form-button bg-sky-600 mt-3"
-                          onClick={() => {
-                            submitTransferOwe(el);
-                          }}
-                        >
-                          Thanh toán
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )
-            }
-            title="Thông báo"
-            trigger="click"
-            open={open}
-            onOpenChange={handleOpenChange}
-          >
-            <div
-              style={{ height: 32, margin: 16, background: 'rgba(255, 255, 255, 0.2)' }}
-              className="flex justify-center items-center text-white 
-             font-bold text-lg rounded-lg cursor-pointer"
+          {Number(typeUser) !== USER_TYPE.admin && (
+            <Popover
+              content={
+                dataNoti &&
+                dataNoti.length > 0 && (
+                  <div className="w-[350px] max-h-[500px] overflow-auto">
+                    <Divider dashed className="bg-sky-600" />
+                    {dataNoti.map((el, index) => (
+                      <div
+                        key={index}
+                        className={clsx('flex p-1', {
+                          ' bg-sky-100 ': el.isSeen === 0,
+                        })}
+                      >
+                        <div className="tex-base font-medium mr-2"> Từ {el.hoTenNguoiGui}: </div>
+                        <div className="tex-base font-normal">{el.message}</div>
+                        {el.type === 0 && el.isSeen === 0 && (
+                          <Button
+                            type="primary"
+                            className="login-form-button bg-sky-600 mt-3"
+                            onClick={() => {
+                              submitTransferOwe(el);
+                            }}
+                          >
+                            Thanh toán
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )
+              }
+              title="Thông báo"
+              trigger="click"
+              open={open}
+              onOpenChange={handleOpenChange}
             >
-              <Badge size="small" count={dataNoti?.filter((item) => item.isSeen === 0).length}>
-                <div className="flex">
-                  <div className="text-white font-bold text-lg mr-2">Thông báo</div>
-                  {dataNoti && dataNoti.length > 0 && (
-                    <MessageOutlined style={{ fontSize: '25px', color: '#08c' }} />
-                  )}
-                </div>
-              </Badge>
-            </div>
-          </Popover>
+              <div
+                style={{ height: 32, margin: 16, background: 'rgba(255, 255, 255, 0.2)' }}
+                className="flex justify-center items-center text-white 
+             font-bold text-lg rounded-lg cursor-pointer"
+              >
+                <Badge size="small" count={dataNoti?.filter((item) => item.isSeen === 0).length}>
+                  <div className="flex">
+                    <div className="text-white font-bold text-lg mr-2">Thông báo</div>
+                    {dataNoti && dataNoti.length > 0 && (
+                      <MessageOutlined style={{ fontSize: '25px', color: '#08c' }} />
+                    )}
+                  </div>
+                </Badge>
+              </div>
+            </Popover>
+          )}
           {Number(typeUser) === USER_TYPE.customer && (
             <Menu
               onClick={onClickMenu}
@@ -506,6 +548,16 @@ const LayoutContainer = () => {
               defaultSelectedKeys={[itemsEmployee[0]?.key as string]}
               mode="inline"
               items={itemsEmployee}
+            ></Menu>
+          )}
+          {Number(typeUser) === USER_TYPE.admin && (
+            <Menu
+              onClick={onClickMenuAdmin}
+              theme="dark"
+              selectedKeys={selectedItemAdmin}
+              defaultSelectedKeys={[itemsAdmin[0]?.key as string]}
+              mode="inline"
+              items={itemsAdmin}
             ></Menu>
           )}
         </Sider>
