@@ -64,7 +64,7 @@ export const SendPrivateUserOld = ({ callBack }: { callBack: () => unknown }) =>
   };
 
   const selectedUserRecommend = (value: number) => {
-    const user = dataRecommend?.find((el) => (el.id = value));
+    const user = dataRecommend?.find((el) => el.id === value);
     form.setFieldsValue({
       numberCard: user?.maTaiKhoanNguoiNhan,
       bank: user?.idNganHang,

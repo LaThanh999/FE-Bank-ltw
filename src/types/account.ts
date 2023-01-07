@@ -53,6 +53,7 @@ export interface UserCustomerDTO {
   update_at: string;
   maNganHang: number;
   soDu: string;
+  isBlock?: number;
 }
 
 export interface ParamsAddCustomerDTO {

@@ -40,6 +40,7 @@ export const SendPrivate = () => {
             type="card"
             size="large"
             centered
+            destroyInactiveTabPane={true}
             className="font-bold"
             items={[
               {

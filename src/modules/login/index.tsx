@@ -33,7 +33,15 @@ export default function Login() {
             localStorage.setItem(TYPE, String(data.type));
             router.push('/home');
           },
-          onError: () => {
+          onError: (data: any) => {
+            if (data.response.data.status === 3) {
+              notification.error({
+                message: `Đăng nhập thất bại`,
+                description: `Tài khoản của bạn đã bị khóa`,
+                placement: 'bottomRight',
+              });
+              return;
+            }
             notification.error({
               message: `Đăng nhập thất bại`,
               description: `Vui lòng kiểm tra lại tài khoản mật khẩu`,

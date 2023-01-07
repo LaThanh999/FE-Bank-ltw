@@ -39,7 +39,7 @@ export const OweUsername = ({
   const { mutate: mutateAdd } = useMutation(AddOweServer);
 
   const selectedUserRecommend = (value: number) => {
-    const user = dataRecommend?.find((el) => (el.id = value));
+    const user = dataRecommend?.find((el) => el.id === value);
     form.setFieldsValue({
       numberCard: user?.maTaiKhoanNguoiNhan,
       bank: user?.idNganHang,

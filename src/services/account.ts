@@ -232,3 +232,14 @@ export const AddMoneyCustomerServer = async ({
     return Promise.reject(error);
   }
 };
+
+export const BlockCustomerServer = async ({ numberCard }: { numberCard: string }) => {
+  try {
+    const { data } = await axios.post(`/taiKhoan/blockCustomer`, {
+      numberCard,
+    });
+    return data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};

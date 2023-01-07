@@ -1,10 +1,14 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Table, Tabs } from 'antd';
+import { Button, Modal, notification, Table, Tabs } from 'antd';
 import { formatStringReplace } from 'helper/common';
 import { formatNumberCurrent } from 'helper/number';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
-import { GetHistoryServer, GetUserByNumberCardWithMoneyServer } from 'services/account';
+import {
+  BlockCustomerServer,
+  GetHistoryServer,
+  GetUserByNumberCardWithMoneyServer,
+} from 'services/account';
 import { UserCustomerDTO } from 'types/account';
 
 export const CustomerDetailComponent = ({ cardNumber }: { cardNumber: string }) => {
@@ -42,6 +46,7 @@ export const CustomerDetailComponent = ({ cardNumber }: { cardNumber: string }) 
   ];
 
   const { mutate: mutateAddUserRecommend } = useMutation(GetUserByNumberCardWithMoneyServer);
+  const { mutate: mutateBlockCustomer } = useMutation(BlockCustomerServer);
 
   const [data, setData] = useState<UserCustomerDTO>();
   const [dataHistory, setDataHistory] = useState<
@@ -110,6 +115,49 @@ export const CustomerDetailComponent = ({ cardNumber }: { cardNumber: string }) 
     }
   };
 
+  const blockCustomer = () => {
+    Modal.confirm({
+      zIndex: 10,
+      title: 'Xác nhận',
+      content: 'Bạn có muốn khóa tài khoản ?',
+      okText: 'Xác nhận',
+      okType: 'default',
+      centered: true,
+      cancelText: 'Hủy',
+      onOk: () => {
+        mutateBlockCustomer(
+          {
+            numberCard: cardNumber,
+          },
+          {
+            onSuccess: () => {
+              notification.success({
+                message: `Thành công`,
+                description: `Khóa tài khoản thành công`,
+                placement: 'bottomRight',
+              });
+              mutateAddUserRecommend(
+                { cardNumber },
+                {
+                  onSuccess: (data) => {
+                    setData(data);
+                  },
+                },
+              );
+            },
+            onError: () => {
+              notification.error({
+                message: `Thất bại`,
+                description: `Khóa tài khoản thất bại`,
+                placement: 'bottomRight',
+              });
+            },
+          },
+        );
+      },
+    });
+  };
+
   return (
     <div className="p-4">
       <div className="text-lg font-medium text-sky-900 flex justify-center mb-4">
@@ -119,7 +167,12 @@ export const CustomerDetailComponent = ({ cardNumber }: { cardNumber: string }) 
         <div className="flex justify-between mb-2">
           <div className="flex">
             Chủ tài khoản:{' '}
-            <div className="ml-4 font-medium text-cyan-900 not-italic">{data?.hoTen}</div>
+            <div className="flex">
+              <div className="ml-4 font-medium text-cyan-900 not-italic mr-2">{data?.hoTen}</div>
+              {data?.isBlock === 1 && (
+                <div className="bg-rose-400 rounded-full p-1 font-normal">Tài khoản đã bị khóa</div>
+              )}
+            </div>
           </div>
           <div className="flex">
             Số điện thoại:{' '}
@@ -140,11 +193,19 @@ export const CustomerDetailComponent = ({ cardNumber }: { cardNumber: string }) 
             )} VND`}</div>
           </div>
         </div>
+        {data?.isBlock !== 1 && (
+          <div className="flex justify-end mt-4">
+            <Button className="bg-sky-900" type="primary" onClick={blockCustomer}>
+              Khóa tài khoản
+            </Button>
+          </div>
+        )}
       </div>
       <Tabs
         defaultActiveKey="1"
         type="card"
         size="middle"
+        destroyInactiveTabPane={true}
         onChange={onChange}
         items={[
           {
