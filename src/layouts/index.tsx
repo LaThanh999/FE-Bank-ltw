@@ -231,7 +231,7 @@ const LayoutContainer = () => {
             dataNoti.length > 0 && (
               <div className="w-[350px] max-h-[500px] overflow-auto">
                 <Divider dashed className="bg-sky-600" />
-                {dataNoti?.map((el, index) => (
+                {dataNoti.map((el, index) => (
                   <div
                     key={index}
                     className={clsx('flex p-1', {
@@ -255,7 +255,7 @@ const LayoutContainer = () => {
             className="flex justify-center items-center text-white 
              font-bold text-lg rounded-lg cursor-pointer"
           >
-            <Badge size="small" count={dataNoti?.length}>
+            <Badge size="small" count={dataNoti?.filter((item) => item.isSeen === 0).length}>
               <div className="flex">
                 <div className="text-white font-bold text-lg mr-2">Thông báo</div>
                 {dataNoti && dataNoti.length > 0 && (
